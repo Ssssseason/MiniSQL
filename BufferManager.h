@@ -27,6 +27,7 @@ private:
 
 class Block
 {
+    friend class BufferManager;
 public:
     const static int BLOCK_SIZE = 4096;
     Block();

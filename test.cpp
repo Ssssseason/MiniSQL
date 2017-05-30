@@ -1,6 +1,6 @@
 #include "BufferManager.h"
 
-int main(void)
+int main()
 {
     BufferManager BM;
 }

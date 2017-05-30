@@ -1,16 +1,14 @@
 #include "BufferManager.h"
-
-
 BufferManager::BufferManager()
 {
-    
+
 }
 
 BufferManager::~BufferManager()
 {
-    for(iter : Buffer_Pool)
+    for(Block* iter : Buffer_Pool)
     {
-        delete *iter;
+        delete iter;
     }
 }
 
@@ -19,7 +17,7 @@ Block* BufferManager::find_block()
     int block_num = get_block_num();
     if(block_num < MAX_BLOCK)
     {
-        Buffer_Pool.push_front(new Block)
+        Buffer_Pool.push_front(new Block);
     }
     else
     {
@@ -38,8 +36,8 @@ void BufferManager::write_file(Block* block_to_write)
 {
     block_to_write->is_pinned = false;
     fstream out(block_to_write->table_name, ios::out | ios::binary);
-    out.seekp(block_to_write->offset * BLOCK_SIZE, ios::beg);
-    out.write(block_to_write, Block::BLOCK_SIZE);
+    out.seekp(block_to_write->offset * Block::BLOCK_SIZE, ios::beg);
+    out.write(block_to_write->record, Block::BLOCK_SIZE);
     block_to_write->is_dirty = false;
     out.close();
     block_to_write->is_pinned = true;
@@ -62,16 +60,16 @@ void BufferManager::read_file(string table_name)
 }
 
 Block::Block():
+    record(new char[BLOCK_SIZE]),
+    offset(0),
     table_name(""),
     is_dirty(false),
-    is_pinned(false),
-    record(new char[BLOCK_SIZE]),
-    offset(0)
+    is_pinned(false)
 {
 
 }
 
 Block::~Block()
 {
-    delete record [];
+    delete []record;
 }
