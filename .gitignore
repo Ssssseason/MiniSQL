@@ -5,7 +5,10 @@
 # VSCode files
 /.vscode/
 # VS2017 files
-/minisql/
+*.sln
+*.vcxproj
+*.filters
+
 # User-specific files
 *.suo
 *.user

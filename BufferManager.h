@@ -3,6 +3,7 @@
 #include <list>
 #include <string>
 #include <fstream>
+#include <cstring>
 using namespace std;
 
 class Block;
@@ -14,10 +15,11 @@ public:
     const static int MAX_BLOCK = 64;
     BufferManager();
     ~BufferManager();
-    Block* find_block();
+    Block* find_block(const string file_name, const int offset);
     void write_file(Block* block_to_write);
-    void read_file(string table_name);
-    unsigned int get_block_num()
+    void read_file(const string file_name);
+    void set_block_front(Block* moved_block);
+    const unsigned int get_block_num()
     {
         return Buffer_Pool.size();
     }
@@ -32,10 +34,12 @@ public:
     const static int BLOCK_SIZE = 4096;
     Block();
     ~Block();
+    void set_dirty();
+    const int get_record_length();
 private:
     char* record;
     int offset;
-    string table_name;
+    string file_name;
     bool is_dirty;
     bool is_pinned;
 };
