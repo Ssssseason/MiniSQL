@@ -4,6 +4,5 @@
 int main()
 {
     BufferManager BM;
-	BM.find_block();
 	cin.get();
 }

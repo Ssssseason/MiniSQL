@@ -8,7 +8,13 @@ BufferManager::~BufferManager()
 {
     for(Block* iter : Buffer_Pool)
     {
+        write_to_file(iter);
         delete iter;
+    }
+    auto iter = Buffer_Pool.begin();
+    while(iter != Buffer_Pool.end())
+    {
+        Buffer_Pool.erase(iter);
     }
 }
 
@@ -82,10 +88,10 @@ void BufferManager::read_to_block(const string file_name, const int offset, Bloc
 void BufferManager::clear_file_buffer(const string file_name)
 {
     auto iter = Buffer_Pool.begin();
-    while(iter != Buffer_Pool().end)
+    while(iter != Buffer_Pool.end())
     {
-        if(iter->file_name == file_name)
-            iter.erase(iter);
+        if((*iter)->file_name == file_name)
+            Buffer_Pool.erase(iter);
         else
             iter++;
     }
