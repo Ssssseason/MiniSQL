@@ -78,6 +78,18 @@ void BufferManager::read_to_block(const string file_name, const int offset, Bloc
     block_to_read->offset = offset;
     block_to_read->is_pinned = false;
 }
+
+void BufferManager::clear_file_buffer(const string file_name)
+{
+    auto iter = Buffer_Pool.begin();
+    while(iter != Buffer_Pool().end)
+    {
+        if(iter->file_name == file_name)
+            iter.erase(iter);
+        else
+            iter++;
+    }
+}
 // void BufferManager::read_file(const string file_name)
 // {
 //     fstream in(file_name, ios::in | ios::binary);

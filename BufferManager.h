@@ -25,6 +25,7 @@ public:
     {
         return Buffer_Pool.size();
     }
+    void clear_file_buffer(const string file_name);
 private:
     list<Block*> Buffer_Pool;
 };
@@ -38,6 +39,10 @@ public:
     ~Block();
     void set_dirty();
     const int get_record_length();
+    char* get_record()
+    {
+        return record;
+    }
 private:
     char* record;
     int offset;
