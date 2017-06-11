@@ -44,8 +44,8 @@ public:
     {
         return record;
     }
-private:
     char* record;
+private:
     int offset;
     string file_name;
     bool is_dirty;
