@@ -66,7 +66,13 @@ void BufferManager::write_to_file(Block* block_to_write)
     block_to_write->is_pinned = false;
     fstream out(block_to_write->file_name, ios::out | ios::binary);
     out.seekp(block_to_write->offset, ios::beg);
-    out.write(block_to_write->record, Block::BLOCK_SIZE);
+    for(int i = 0; i < 20; i++)
+    {
+        if(block_to_write->record[i * 128] == 1)
+            continue;
+        else
+            out.write(block_to_write->record + i * 128, 128);
+    }
     block_to_write->is_dirty = false;
     out.close();
     block_to_write->is_pinned = true;
