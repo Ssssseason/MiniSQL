@@ -1,10 +1,14 @@
+#include "stdafx.h"
 #include"Interpreter.h"
 #include "transfrom.h"
+#include "API.h"
 #include <iostream> 
 #include <string>
 #include <algorithm>
 
+extern API myAPI;
 extern Transform myT;
+extern bool online;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 //读取用户输入
@@ -738,7 +742,7 @@ string select_condition(string T){
 		else
 			T = temp1 + " << " + temp2;
 	}
-	else if ((index = T.find("<>")) != -1){
+	else if ((index = T.find("<>")) != -1 || (index = T.find("!="))){
 		m1 = index - 1;
 		while (m1 >= start&&((T[m1] == ' ')||(T[m1]=='\''))) m1--;
 		if (m1 < start){
@@ -1285,6 +1289,98 @@ string use_clause(string SQL, int start){
 	return SQL;
 }
 
+//处理一个句子
+string file_line(string s){
+	int start = 0, end;
+	string temp;
+	if (s[s.length() - 1] == ';'){
+		s[s.length() - 1] = ' ';
+		s += ";";
+	}
+	transform(s.begin(), s.end(), s.begin(), tolower);
+	while (s[start] == ' ')
+		start++;
+	end = s.find(' ', start);
+	temp = s.substr(start, end - start);
+	start = end + 1;
+	//若无输入，打印出错信息
+	if (temp.empty())
+	{
+		cout << "syntax error: empty statement!" << endl;
+		s = "99";
+	}
+	//若为create语句
+	else if (temp == "create")
+		s = create_clause(s, start);
+	//若为drop语句
+	else if (temp == "drop")
+		s = drop_clause(s, start);
+	//若为select语句
+	else if (temp == "select")
+		s = select_clause(s, start);
+	//若为insert语句
+	else if (temp == "insert")
+		s = insert_clause(s, start);
+	//若为delete语句
+	else if (temp == "delete")
+		s = delete_clause(s, start);
+	//若为use语句
+	else if (temp == "use")
+		s = use_clause(s, start);
+	//若为execfile语句
+	else if (temp == "execfile")
+		s = execfile_clause(s, start);
+	//若为quit语句
+	else if (temp == "quit"){
+		s = quit_clause(s, start);
+		if (s == "90") online = 0;
+	}
+	//获取帮助
+	else if (temp == "help"){
+		cout << "You can use those command:" << endl << "Create" << endl << "Use" << endl << "Select" << endl << "Drop" << endl << "Execfile" << endl << "Delete" << endl << "Quit" << endl;
+		s = "";
+	}
+	//若为非法语句
+	else
+	{
+		cout << "syntax error:" << " " << temp << "---is not a valid key word!" << endl;
+		s = "99";
+	}
+	return s;
+}
+
+//读取文件中的内容
+string execfile_file(string temp){
+	temp += ".txt";
+	int count = 0;
+	string SQL, s;
+	ifstream infile;
+	infile.open(temp);
+	if (!infile){//若文件打开失败
+		cout << "Error in reading the file!" << endl;
+		SQL = "99";
+		return SQL;
+	}
+	else{//文件打开成功
+		while (getline(infile, s)){
+			s = file_line(s);
+			if (s == "99"){
+				SQL = "99";
+				return SQL;
+			}
+			else{
+				if (count == 0){
+					SQL += s;
+				}
+				else SQL += "\n"+s;
+				count++;
+			}
+		}
+		SQL += "\n";
+		infile.close();
+	}
+	return SQL;
+}
 //验证execfile语句是否有效
 string execfile_clause(string SQL, int start){
 	string temp;
@@ -1311,8 +1407,14 @@ string execfile_clause(string SQL, int start){
 			cout << "error:" << SQL.substr(index, SQL.length() - index - 2) << "---is not a valid file name!" << endl;
 			SQL = "99";
 		}
-		else
-			SQL = "30" + temp;
+		else{
+			if (execfile_file(temp) == "99"){
+				SQL = "99";
+				return SQL;
+			}
+			else
+				SQL = execfile_file(temp);
+		}
 	}
 	return SQL;
 }
@@ -1334,148 +1436,266 @@ string quit_clause(string SQL, int start){
 /////////////////////////////////////////////////////////////////////////////////////////////
 //获取用户输入，并对输入作有效性检查，若正确，返回语句的内部表示形式
 string Interpreter(string statement)
+{
+	string SQL;
+	string temp;
+	string sql;
+	int start = 0, end;
+	if (statement.empty())
+		//获取用户输入
+		SQL = read_input();
+	else
+		SQL = statement;
+	//获取输入的第一个单词
+	while (SQL[start] == ' ')
+		start++;
+	end = SQL.find(' ', start);
+	temp = SQL.substr(start, end - start);
+	start = end + 1;
+	//若无输入，打印出错信息
+	if (temp.empty())
 	{
-		string SQL;
-		string temp;
-		string sql;
-		int start = 0, end;
-		if (statement.empty())
-			//获取用户输入
-			SQL = read_input();
-		else
-			SQL = statement;
-		//获取输入的第一个单词
-		while (SQL[start] == ' ')
-			start++;
-		end = SQL.find(' ', start);
-		temp = SQL.substr(start, end - start);
-		start = end + 1;
-		//若无输入，打印出错信息
-		if (temp.empty())
-		{
-			cout << "syntax error: empty statement!" << endl;
-			SQL = "99";
-		}
-		//若为create语句
-		else if (temp == "create") {
-			SQL = create_clause(SQL, start);
-			if (SQL.substr(0, 2) == "00") {
-				// create database
-				string DBName = myT.createDB(SQL);
-
-			}
-			else if (SQL.substr(0, 2) == "01") {
-				// create table
-				Table tbl = myT.createTable(SQL);
-
-			}
-			else if (SQL.substr(0, 2) == "02") {
-				// create index
-				Index index = myT.createIndex(SQL);
-
-			}
-		}
-		//若为drop语句
-		else if (temp == "drop") {
-			SQL = drop_clause(SQL, start);
-			if (SQL.substr(0, 2) == "10") {
-				// drop database
-				string DBName = SQL.substr(2, SQL.size() - 2);
-
-			}
-			else if (SQL.substr(0, 2) == "11") {
-				// drop table
-				string tblName = SQL.substr(2, SQL.size() - 2);
-
-			}
-			else if (SQL.substr(0, 2) == "12") {
-				// drop index
-				string indexName = SQL.substr(2, SQL.size() - 2);
-
-			}
-		}
-		//若为select语句
-		else if (temp == "select") {
-			SQL = select_clause(SQL, start);
-			//if (SQL.substr(0, 2) == "40" || SQL.substr(0, 2) == "41") {
-			//	// 合并有无选择条件
-			//	size_t nextPos = SQL.find(",", 0);
-			//	string tblName = SQL(0, )
-			//	Condition_list cList = myT.selectRecord(SQL);
-			//}
-			if (SQL.substr(0, 2) == "41") {
-				// no "where"
-				string tblName = SQL.substr(2, SQL.size() - 2);
-				Condition_list cList;
-
-			}
-			else if (SQL.substr(0, 2) == "40") {
-				// "where"
-				size_t nextPos = SQL.find(",", 0);
-				string tblName = SQL.substr(2, nextPos - 2);
-				Condition_list cList = myT.selectRecord(SQL);
-
-
-			}
-		}
-		//若为insert语句
-		else if (temp == "insert") {
-			SQL = insert_clause(SQL, start) + ",";
-			if (SQL.substr(0, 2) == "60") {
-				InsertInfo insetInfo = myT.insertRecord(SQL);
-
-			}
-		}
-		//若为delete语句
-		else if (temp == "delete") {
-			SQL = delete_clause(SQL, start);
-			//if (SQL.substr(0, 2) == "50" || SQL.substr(0, 2) == "51") {
-			//	// 合并有无选择条件
-			//	Condition_list cList = myT.deleteRecord(SQL);
-			//}
-
-			if (SQL.substr(0, 2) == "51") {
-				// no "where"
-				string tblName = SQL.substr(2, SQL.size() - 2);
-				Condition_list cList;
-
-			}
-			else if (SQL.substr(0, 2) == "50") {
-				// "where"
-				size_t nextPos = SQL.find(",", 0);
-				string tblName = SQL.substr(2, nextPos - 2);
-				Condition_list cList = myT.deleteRecord(SQL);
-
-
-			}
-		}
-		//若为use语句
-		else if (temp == "use") {
-			SQL = use_clause(SQL, start);
-			if (SQL.substr(0, 2) == "20") {
-				string DBName = SQL.substr(2, SQL.size() - 2);
-
-			}
-		}
-		//若为execfile语句
-		else if (temp == "execfile") {
-			SQL = execfile_clause(SQL, start);
-			string fileName = SQL.substr(2, SQL.size() - 2);
-		}
-		//若为quit语句
-		else if (temp == "quit") {
-			SQL = quit_clause(SQL, start);
-		}
-		//获取帮助
-		else if (temp == "help") {
-			SQL = "80";
-		}
-		//若为非法语句
-		else
-		{
-			cout << "syntax error:" << " " << temp << "---is not a valid key word!" << endl;
-			SQL = "99";
-		}
-		//返回输入语句的内部形式
-		return SQL;
+		cout << "syntax error: empty statement!" << endl;
+		SQL = "99";
 	}
+	//若为create语句
+	else if (temp == "create") {
+		SQL = create_clause(SQL, start);
+		if (SQL.substr(0, 2) == "00") {
+			// create database
+			string DBName = myT.createDB(SQL);
+			myAPI.createDatabase(DBName);
+		}
+		else if (SQL.substr(0, 2) == "01") {
+			// create table
+			Table tbl = myT.createTable(SQL);
+			myAPI.createTable(tbl);
+		}
+		else if (SQL.substr(0, 2) == "02") {
+			// create index
+			Index index = myT.createIndex(SQL);
+			myAPI.createIndex(index);
+		}
+	}
+	//若为drop语句
+	else if (temp == "drop") {
+		SQL = drop_clause(SQL, start);
+		if (SQL.substr(0, 2) == "10") {
+			// drop database
+			string DBName = SQL.substr(2, SQL.size() - 2);
+			myAPI.dropDatabase(DBName);
+		}
+		else if (SQL.substr(0, 2) == "11") {
+			// drop table
+			string tblName = SQL.substr(2, SQL.size() - 2);
+			myAPI.dropTable(tblName);
+		}
+		else if (SQL.substr(0, 2) == "12") {
+			// drop index
+			string indexName = SQL.substr(2, SQL.size() - 2);
+			myAPI.dropIndex(indexName);
+		}
+	}
+	//若为select语句
+	else if (temp == "select") {
+		SQL = select_clause(SQL, start);
+		//if (SQL.substr(0, 2) == "40" || SQL.substr(0, 2) == "41") {
+		//	// 合并有无选择条件
+		//	size_t nextPos = SQL.find(",", 0);
+		//	string tblName = SQL(0, )
+		//	Condition_list cList = myT.selectRecord(SQL);
+		//}
+		if (SQL.substr(0, 2) == "41") {
+			// no "where"
+			string tblName = SQL.substr(2, SQL.size() - 2);
+			Condition_list cList;
+			string attrName = "";
+			myAPI.selectTuple(tblName, attrName, cList);
+		}
+		else if (SQL.substr(0, 2) == "40") {
+			// "where"
+			size_t nextPos = SQL.find(",", 0);
+			string tblName = SQL.substr(2, nextPos - 2);
+			Condition_list cList = myT.selectRecord(SQL);
+			string attrName = "";
+			myAPI.selectTuple(tblName, attrName, cList);
+		}
+		else if (SQL.substr(0, 2) == "43") {
+			// col no "where"
+			size_t pos = SQL.find(",", 0);
+			string attrName = SQL.substr(2, pos - 2);
+			string tblName = SQL.substr(pos + 1, SQL.size() - pos);
+			Condition_list cList;
+			myAPI.selectTuple(tblName, attrName, cList);
+		}
+		else if (SQL.substr(0, 2) == "42") {
+			// col "where"
+			size_t pos;
+			string attrName = SQL.substr(2, pos - 2);
+			size_t nextPos = SQL.find(",", pos + 1);
+			string tblName = SQL.substr(pos + 1, nextPos - pos - 1);
+			SQL = "42" + SQL.substr(pos + 1, SQL.size() - pos);
+			Condition_list cList = myT.selectRecord(SQL);
+			myAPI.selectTuple(tblName, attrName, cList);
+		}
+	}
+	//若为insert语句
+	else if (temp == "insert") {
+		SQL = insert_clause(SQL, start) + ",";
+		if (SQL.substr(0, 2) == "60") {
+			InsertInfo insertInfo = myT.insertRecord(SQL);
+			myAPI.insertTuple(insertInfo.table_name, insertInfo.values);
+		}
+	}
+	//若为delete语句
+	else if (temp == "delete") {
+		SQL = delete_clause(SQL, start);
+		//if (SQL.substr(0, 2) == "50" || SQL.substr(0, 2) == "51") {
+		//	// 合并有无选择条件
+		//	Condition_list cList = myT.deleteRecord(SQL);
+		//}
+		if (SQL.substr(0, 2) == "51") {
+			// no "where"
+			string tblName = SQL.substr(2, SQL.size() - 2);
+			Condition_list cList;
+			myAPI.deleteTuple(tblName, cList);
+		}
+		else if (SQL.substr(0, 2) == "50") {
+			// "where"
+			size_t nextPos = SQL.find(",", 0);
+			string tblName = SQL.substr(2, nextPos - 2);
+			Condition_list cList = myT.deleteRecord(SQL);
+			myAPI.deleteTuple(tblName, cList);
+		}
+	}
+	//若为use语句
+	else if (temp == "use") {
+		SQL = use_clause(SQL, start);
+		if (SQL.substr(0, 2) == "20") {
+			string DBName = SQL.substr(2, SQL.size() - 2);
+			myAPI.useDatabase(DBName);
+		}
+	}
+	//若为execfile语句
+	else if (temp == "execfile") {
+		SQL = execfile_clause(SQL, start);
+		int tempstart = 0, tempend;
+		string tempstring;
+		while ((tempend = SQL.find('\n', tempstart)) != -1){
+			tempstring = SQL.substr(tempstart, tempend - tempstart);
+			cout << tempstring<<endl;
+			tempstart = tempend + 1;
+			if (tempstring.substr(0, 2) == "00"){
+				// create database
+				string DBName = myT.createDB(tempstring);
+				myAPI.createDatabase(DBName);
+			}
+			else if (tempstring.substr(0, 2) == "01") {
+				// create table
+				Table tbl = myT.createTable(tempstring);
+				myAPI.createTable(tbl);
+			}
+			else if (tempstring.substr(0, 2) == "02") {
+				// create index
+				Index index = myT.createIndex(tempstring);
+				myAPI.createIndex(index);
+			}
+			//drop
+			else if (tempstring.substr(0, 2) == "10") {
+				// drop database
+				string DBName = tempstring.substr(2, tempstring.size() - 2);
+				myAPI.dropDatabase(DBName);
+			}
+			else if (tempstring.substr(0, 2) == "11") {
+				// drop table
+				string tblName = tempstring.substr(2, tempstring.size() - 2);
+				myAPI.dropTable(tblName);
+			}
+			else if (tempstring.substr(0, 2) == "12") {
+				// drop index
+				string indexName = tempstring.substr(2, tempstring.size() - 2);
+				myAPI.dropIndex(indexName);
+			}
+			//select
+			else if (tempstring.substr(0, 2) == "41") {
+				// no "where"
+				string tblName = tempstring.substr(2, tempstring.size() - 2);
+				Condition_list cList;
+				string attrName = "";
+				myAPI.selectTuple(tblName, attrName, cList);
+			}
+			else if (tempstring.substr(0, 2) == "40") {
+				// "where"
+				size_t nextPos = tempstring.find(",", 0);
+				string tblName = tempstring.substr(2, nextPos - 2);
+				Condition_list cList = myT.selectRecord(tempstring);
+				string attrName = "";
+				myAPI.selectTuple(tblName, attrName, cList);
+			}
+			else if (tempstring.substr(0, 2) == "43") {
+				// col no "where"
+				size_t pos = tempstring.find(",", 0);
+				string attrName = tempstring.substr(2, pos - 2);
+				string tblName = tempstring.substr(pos + 1, tempstring.size() - pos);
+				Condition_list cList;
+				myAPI.selectTuple(tblName, attrName, cList);
+			}
+			else if (tempstring.substr(0, 2) == "42") {
+				// col "where"
+				size_t pos;
+				string attrName = tempstring.substr(2, pos - 2);
+				size_t nextPos = tempstring.find(",", pos + 1);
+				string tblName = tempstring.substr(pos + 1, nextPos - pos - 1);
+				tempstring = "42" + tempstring.substr(pos + 1, tempstring.size() - pos);
+				Condition_list cList = myT.selectRecord(tempstring);
+				myAPI.selectTuple(tblName, attrName, cList);
+			}
+			//insert
+			else if (tempstring.substr(0, 2) == "60") {
+				tempstring += ",";
+				InsertInfo insertInfo = myT.insertRecord(tempstring);
+				myAPI.insertTuple(insertInfo.table_name, insertInfo.values);
+			}
+			//delete
+			else if (tempstring.substr(0, 2) == "51") {
+				// no "where"
+				string tblName = tempstring.substr(2, tempstring.size() - 2);
+				Condition_list cList;
+				myAPI.deleteTuple(tblName, cList);
+			}
+			else if (tempstring.substr(0, 2) == "50") {
+				// "where"
+				size_t nextPos = tempstring.find(",", 0);
+				string tblName = tempstring.substr(2, nextPos - 2);
+				Condition_list cList = myT.deleteRecord(tempstring);
+				myAPI.deleteTuple(tblName, cList);
+			}
+			//use
+			else if (tempstring.substr(0, 2) == "20") {
+				string DBName = tempstring.substr(2, tempstring.size() - 2);
+				myAPI.useDatabase(DBName);
+			}
+			//quit
+			else if (tempstring.substr(0, 2) == "90"){
+				online = 0;
+			}
+		}
+	}
+	//若为quit语句
+	else if (temp == "quit") {
+		SQL = quit_clause(SQL, start);
+		if (SQL == "90") online = 0;
+	}
+	//获取帮助
+	else if (temp == "help") {
+		SQL = "80";
+	}
+	//若为非法语句
+	else
+	{
+		cout << "syntax error:" << " " << temp << "---is not a valid key word!" << endl;
+		SQL = "99";
+	}
+	//返回输入语句的内部形式
+	return SQL;
+}
