@@ -1,8 +1,11 @@
-#include"Interpreter.h"
-#include"MiniSQL.h"
+#include "stdafx.h"
+#include "Interpreter.h"
+#include "MiniSQL.h"
 #include "transfrom.h"
-
+#include "iostream"
+using namespace std;
 Transform myT;
+bool online = 1;
 
 void main()
 {
@@ -15,7 +18,7 @@ void main()
 	cout << "\t\t               请输入SQL语句 " << endl;
 	cout << "\t\t***********************************************" << endl;
 	cout << endl << endl;
-	while (1)
+	while (online)
 	{
 		cout << "MiniSQL-->> ";
 		SQL="";//清空SQL语句
@@ -24,4 +27,5 @@ void main()
 //		API_Module(SQL);
 		cout << SQL << endl;
 	}
+	cout << "\t\t              谢谢使用，再见！ " << endl;
 }

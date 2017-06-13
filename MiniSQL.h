@@ -12,9 +12,17 @@ using namespace std;
 #define NULL 0
 #define UNIQUE 1
 #define PRIMARY 2
-#define CHAR 0
-#define FLOAT 1
-#define INT 2
+#define CHAR 3
+#define FLOAT 2
+#define INT 1
+
+typedef float KeyType;
+typedef int DataType;
+
+struct keyOffsetNode {
+	KeyType key; //属性值
+	DataType data;//偏移量
+};
 
 //	用于描述表中一个属性在表中的具体信息
 struct Attribute
@@ -29,8 +37,9 @@ struct Attribute
 //	用于描述表的信息
 struct Table
 {
+	string database_name;
 	string table_name;  //表名
-	int attr_count;				//表中属性的总个数
+	int attr_count;		//表中属性的总个数
 	Attribute attrs[32];	//表的所有属性列表, 最多32个属性
 							//return primary key id
 	int getPrimaryKeyId() {
@@ -75,12 +84,15 @@ struct Condition
 	string op_type;		//条件所用到的比较模式，分别为"<>", "=", ">=", "<=", "<", ">"
 	string cmp_value;	//条件所需要进行比较的值
 };
-typedef list<Condition> Condition_list;
+//改为vector
+typedef vector<Condition> Condition_list;
+typedef Condition_list condList;
 
 //	用于描述索引信息
 struct Index
 {
 	string index_name;
+	string database_name;
 	string table_name;
 	string attr_name;	//	索引所对应的属性
 };
@@ -92,6 +104,7 @@ struct Tuple : public Table
 };
 
 struct InsertInfo {
+	string database_name;
 	string table_name;
 	int value_cnt;
 	string values[32];

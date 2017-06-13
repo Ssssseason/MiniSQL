@@ -1,25 +1,27 @@
 #ifndef _CatalogManager_H__
 #define _CatalogManager_H__
 
-#include "interpreter.hpp"
+//#include "interpreter.hpp"
+#include "MiniSQL.h"
+#include <string>
+#include <fstream>
+#include "stdafx.h"
 
-
-/*bool judge_table_exist(string table_name,string database_name);
-bool createtable(interpreter& sql);
-bool droptable(interpreter& sql);
-bool createdatabase(string database_name);
-bool judge_index_exist(interpreter &sql);
-bool createindex(interpreter& sql);
-bool dropindex(interpreter& sql);
-bool judge_database_exist(string database_name);
-bool dropdatabase(string database_name);
-bool judge_value_match(interpreter& sql);
-bool judge_condition_value_match(interpreter& sql);
-bool judge_attr_exsit(interpreter& sql);
-bool judge_condition_attr_exsit(interpreter& sql);
-bool use(interpreter &sql);*/
-
-
+class CatalogManager {
+public:
+	bool judge_table_exist(string table_name, string database_name);
+	bool createtable(Table& table);
+	Table Read_Table_info(string database_name, string table_name);
+	bool droptable(Table& table);
+	bool judge_database_exist(string database_name);
+	bool createdatabase(string database_name);
+	bool dropdatabase(string database_name);
+	bool judge_index_exist(Index &index);
+	bool createindex(Index &index);
+	Index Read_Index_info(string &database_name, string &index_name);
+	vector<Index> Read_Index_info(string &database_name);
+	bool dropindex(Index &index);
+};
 
 bool CatalogManager::judge_table_exist(string table_name,string database_name)
 {
@@ -34,11 +36,11 @@ bool CatalogManager::judge_table_exist(string table_name,string database_name)
 	}
 	return false;
 }
+
 bool CatalogManager::createtable(Table& table)
 {
 	int num_table=0;
-	int total_len;
-	string table_name=table.table_name,database_name=DBName;
+	string table_name=table.table_name, database_name=table.database_name;
 	if(judge_table_exist(table_name,database_name))
 	{
 		cout<<"the table has already exisit"<<endl;
@@ -63,7 +65,7 @@ bool CatalogManager::createtable(Table& table)
 	out.close();
 	//table总数加1
 	out.open(database_name+"\\"+table_name+"_table_info.cat",ios::binary);
-	int total_len=table.lengh();
+	int total_len=table.length();
 	//创建表的信息文件
 	//out.write((char*)&total_len,sizeof(int));
 	unsigned int i=0;
@@ -81,6 +83,7 @@ bool CatalogManager::createtable(Table& table)
 	//将属性写到相应的表的信息文件中,格式：一条记录的总位数，每个属性名20个字节，属性对应的四个信息各四个字节，所以总的字节数为36，前面加一个总位数。
 	return true;
 }
+
 Table CatalogManager::Read_Table_info(string database_name,string table_name)
 {
 	ifstream in;
@@ -92,24 +95,25 @@ Table CatalogManager::Read_Table_info(string database_name,string table_name)
 	{
 		char attr_name[20];
 		in.read(attr_name,20);
-		string s(attr_name,attr_name+strlen(attr_name))
+		string s(attr_name, attr_name + strlen(attr_name));
 		table.attrs[num_attr].attr_name=s;
-		in.read((char*)&table.attrs[i].attr_type,sizeof(int));
-		in.read((char*)&table.attrs[i].attr_key_type,sizeof(int));
-		in.read((char*)&table.attrs[i].attr_len,sizeof(int));
-		in.read((char*)&table.attrs[i].attr_id,sizeof(int));//将表的属性信息写入
+		in.read((char*)&table.attrs[num_attr].attr_type,sizeof(int));
+		in.read((char*)&table.attrs[num_attr].attr_key_type,sizeof(int));
+		in.read((char*)&table.attrs[num_attr].attr_len,sizeof(int));
+		in.read((char*)&table.attrs[num_attr].attr_id,sizeof(int));//将表的属性信息写入
 		num_attr++;
 	}
 	table.attr_count=num_attr;
 	return table;
 }
+
 bool CatalogManager::droptable(Table& table)
 {
 	ofstream out;
 	ifstream in;
 	string content;
 	int num_table;
-	string table_name=table.table_name,database_name=DBName;
+	string table_name=table.table_name, database_name=table.database_name;
 	if(!judge_table_exist(table_name,database_name)) //判断是否存在同名的表
 	{
 		cout<<"the table does'nt exisit"<<endl;
@@ -141,6 +145,7 @@ bool CatalogManager::droptable(Table& table)
 		return true;
 	}
 }
+
 bool CatalogManager::judge_database_exist(string database_name)
 {
 	ifstream in;
@@ -167,6 +172,7 @@ bool CatalogManager::judge_database_exist(string database_name)
 	}
 	return true;	
 }*/
+
 bool CatalogManager::createdatabase(string database_name)
 {
 	ofstream out;
@@ -198,6 +204,7 @@ bool CatalogManager::createdatabase(string database_name)
 		//创建一个tablelist的文件和numtable的文件
 	}
 }
+
 bool CatalogManager::dropdatabase(string database_name)
 {
 	ofstream out;
@@ -225,6 +232,7 @@ bool CatalogManager::dropdatabase(string database_name)
 	}
 	return true;	
 }
+
 bool CatalogManager::judge_index_exist(Index &index)//再商量，需要一个dbname
 {
 	ifstream in;
@@ -239,6 +247,7 @@ bool CatalogManager::judge_index_exist(Index &index)//再商量，需要一个db
 	}
 	return false;
 }
+
 bool CatalogManager::createindex(Index &index)
 {
 	ofstream out;
@@ -255,7 +264,8 @@ bool CatalogManager::createindex(Index &index)
 	out.close();
 	return true;	   
 }
-Index CatalogManager::Read_Index_info(string database_name,string index_name)
+
+Index CatalogManager::Read_Index_info(string &database_name,string &index_name)
 {
 	ifstream in;
 	Index index;
@@ -266,7 +276,8 @@ Index CatalogManager::Read_Index_info(string database_name,string index_name)
 		if(index.index_name==index_name) return index;
 	} 
 }
-vector<Index> CatalogManager::Read_Index_info(string database_name)
+
+vector<Index> CatalogManager::Read_Index_info(string &database_name)
 {
 	ifstream in;
 	Index index;
@@ -279,6 +290,7 @@ vector<Index> CatalogManager::Read_Index_info(string database_name)
 	} 
 	return indexs;
 }
+
 bool CatalogManager::dropindex(Index &index)
 {
 	ofstream out;
