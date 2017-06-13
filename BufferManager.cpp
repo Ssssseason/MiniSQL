@@ -8,13 +8,24 @@ BufferManager::~BufferManager()
 {
     for(Block* iter : Buffer_Pool)
     {
-        write_to_file(iter);
         delete iter;
     }
     auto iter = Buffer_Pool.begin();
     while(iter != Buffer_Pool.end())
     {
-        Buffer_Pool.erase(iter);
+        Buffer_Pool.erase(iter++);
+    }
+}
+
+void BufferManager::flush()
+{
+    for(Block* iter : Buffer_Pool)
+    {
+        if(iter->is_dirty == true)
+        {
+            write_to_file(iter);
+            iter->is_dirty = false;
+        }
     }
 }
 
@@ -102,27 +113,6 @@ void BufferManager::clear_file_buffer(const string file_name)
             iter++;
     }
 }
-// void BufferManager::read_file(const string file_name)
-// {
-//     fstream in(file_name, ios::in | ios::binary);
-//     int offset_to_end = ios::end;
-//     int read_offset = 0;
-//     while(!in.eof())
-//     {
-//         if(offset_to_end >= Block::BLOCK_SIZE)
-//             read_offset = offset_to_end - Block::BLOCK_SIZE;
-//         else
-//             read_offset = offset_to_end;
-//         Block* block = find_block(file_name, read_offset);
-//         block->is_pinned = true;
-//         block->offset = in.tellg();
-//         in.read(block->record, Block::BLOCK_SIZE);
-//         block->file_name = file_name;
-//         set_block_front(block);
-//         block->is_pinned = false;
-//     }
-//     in.close();
-// }
 
 const int BufferManager::file_block(string file_name)
 {
@@ -145,7 +135,7 @@ Block::Block():
 const int Block::get_record_length()
 {
     for(int i = 0; i < BLOCK_SIZE; ++i)
-        if(record[i] == 0)
+        if(record[i] == 1)
             return i + 1;
     return BLOCK_SIZE;
 }

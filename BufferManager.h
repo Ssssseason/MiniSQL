@@ -15,20 +15,19 @@ public:
     const static int MAX_BLOCK = 64;
     BufferManager();
     ~BufferManager();
-    Block* find_block(const string file_name, const int offset);
-
-    const int file_block(string file_name);
+    Block* find_block(const string file_name, const int offset); // get a block*
+    void flush();                               // when clearing file, flush the buffer into disk
+    const int file_block(string file_name);     // get the block number in one file
+    void clear_file_buffer(const string file_name); // after deleting file, clear the existing content in buffer
+private:
+    list<Block*> Buffer_Pool;
+    void write_to_file(Block* block_to_write);
+    void read_to_block(const string file_name, const int offset, Block* block_to_read);
+    void set_block_front(Block* moved_block);
     const unsigned int get_block_num()
     {
         return Buffer_Pool.size();
     }
-    void clear_file_buffer(const string file_name);
-private:
-    list<Block*> Buffer_Pool;
-    void write_to_file(Block* block_to_write);
-//    void read_file(const string file_name);
-    void read_to_block(const string file_name, const int offset, Block* block_to_read);
-    void set_block_front(Block* moved_block);
 };
 
 class Block
@@ -39,13 +38,13 @@ public:
     Block();
     ~Block();
     void set_dirty();
-    const int get_record_length();
+    const int get_record_length();      // get the length of the record
     char* get_record()
     {
         return record;
     }
-    char* record;
 private:
+    char* record;
     int offset;
     string file_name;
     bool is_dirty;
