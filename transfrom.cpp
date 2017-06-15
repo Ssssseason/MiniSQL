@@ -95,8 +95,8 @@ InsertInfo Transform::insertRecord(const string &SQL) {
 
 	iInfo.table_name = values[0];
 	it = values.begin();
-	for (int i = 1; i < values.size(); i++) {
-		iInfo.values[i - 1] = values[i];
+	for (++it; it != values.end(); ++it) {
+		iInfo.values.push_back(*it);
 	}
 	iInfo.value_cnt = values.size();
 	return iInfo;

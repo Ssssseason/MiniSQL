@@ -107,5 +107,6 @@ struct InsertInfo {
 	string database_name;
 	string table_name;
 	int value_cnt;
-	string values[32];
+	vector<string> values;
+	//string values[32];
 };
