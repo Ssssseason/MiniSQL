@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INDEXMANAGER_H
 #define INDEXMANAGER_H
 
@@ -32,7 +33,6 @@ public:
     //查找，返回地址列表
     vector<DataType> selectRecord(string db, string table, string attr,int key, string opcode);
     vector<DataType> selectBetweenRecord(string db, string table, string attr,KeyType low, KeyType high);
-
     //是否存在
     bool search(string db, string table, string attr,KeyType key);
     //打印索引列表

@@ -4,7 +4,7 @@
 
 #include "BufferManager.h"
 #include "MiniSQL.h"
-#include "indexmanager.h"
+//#include "indexmanager.h"
 #include <vector>
 extern BufferManager block_record;
 const char deletevalue = 1;

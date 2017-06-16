@@ -4,7 +4,7 @@
 
 #include "CatalogManager.h"
 #include "RecordManager.h"
-#include "BufferManager.h"
+#include "indexmanager.h"
 #include "MiniSQL.h"
 #include <ctime>
 #include <iostream>

@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "indexmanager.h"
 IndexManager::IndexManager(){
 }

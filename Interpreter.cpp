@@ -1,3 +1,4 @@
+#pragma once
 #include "stdafx.h"
 #include"Interpreter.h"
 #include "transfrom.h"

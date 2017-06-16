@@ -1,356 +1,299 @@
+#include "stdafx.h"
 #include "CatalogManager.h"
-
-
-
-/*bool judge_table_exist(string table_name,string database_name)
+bool CatalogManager::judge_table_exist(string table_name, string database_name)
 {
 	ifstream in;
 	string content;
-	in.open(database_name+"\\"+database_name+"_tablelist.txt",ios::in);
-	if(!in.is_open()) {cout<<"tablelist file open error"<<endl;return false;}
-	while(!in.eof())
+	in.open(database_name + "\\" + database_name + "_tablelist.txt", ios::in);
+	if (!in.is_open()) { cout << "tablelist file open error" << endl; return false; }
+	while (!in.eof())
 	{
-		getline(in,content);
-		if(content==table_name) return true;
+		getline(in, content);
+		if (content == table_name) return true;
 	}
 	return false;
 }
-bool createtable(interpreter& sql)
+
+bool CatalogManager::createtable(Table& table)
 {
-	int num_table=0;
-	int len=0,total_len;
-	string table_name=sql.name_table,database_name=sql.name_database;
-	if(judge_table_exist(table_name,database_name))
+	int num_table = 0;
+	string table_name = table.table_name, database_name = table.database_name;
+	if (judge_table_exist(table_name, database_name))
 	{
-		cout<<"the table has already exisit"<<endl;
+		cout << "the table has already exisit" << endl;
 		return false;
 	}
-	 //åˆ¤æ–­æ˜¯å¦å­˜åœ¨åŒåçš„è¡¨
+	//ÅÐ¶ÏÊÇ·ñ´æÔÚÍ¬ÃûµÄ±í
 	ofstream out;
 	ifstream in;
-	out.open(database_name+"\\"+database_name+"_tablelist.txt",ios::app);//å°†æ–°è¡¨çš„åå­—å†™åˆ°å¯¹åº”çš„æ•°æ®åº“ä¿¡æ¯ä¸­
-	out<<table_name<<endl;
+	out.open(database_name + "\\" + database_name + "_tablelist.txt", ios::app);//½«ÐÂ±íµÄÃû×ÖÐ´µ½¶ÔÓ¦µÄÊý¾Ý¿âÐÅÏ¢ÖÐ
+	out << table_name << endl;
 	out.close();
-	//æŠŠæ–°è¡¨å†™åˆ°æ–°çš„æ–‡ä»¶é‡Œ
-	out.open(database_name+"\\"+table_name+".blo",ios::binary);//åˆ›å»ºè¡¨çš„è®°å½•æ–‡ä»¶
+	//°ÑÐÂ±íÐ´µ½ÐÂµÄÎÄ¼þÀï
+	out.open(database_name + "\\" + table_name + ".blo", ios::binary);//´´½¨±íµÄ¼ÇÂ¼ÎÄ¼þ
 	out.close();
-	out.open(database_name+"\\"+table_name+"_index_info.idx",ios::binary);//åˆ›å»ºè¡¨çš„æ£€ç´¢ä¿¡æ¯æ–‡ä»¶
-	out.close();
-	//åˆ›å»ºå‚¨å­˜è¡¨æ‰€éœ€è¦çš„æ–‡ä»¶
-	in.open(database_name+"\\"+database_name+"_numtable.txt",ios::in);
-	in>>num_table;
+	//´´½¨´¢´æ±íËùÐèÒªµÄÎÄ¼þ
+	in.open(database_name + "\\" + database_name + "_numtable.txt", ios::in);
+	in >> num_table;
 	num_table++;
 	in.close();
-	out.open(database_name+"\\"+database_name+"_numtable.txt",ios::out);
-	out<<num_table<<"\t";
+	out.open(database_name + "\\" + database_name + "_numtable.txt", ios::out);
+	out << num_table << "\t";
 	out.close();
-	//tableæ€»æ•°åŠ 1
-	out.open(database_name+"\\"+table_name+"_table_info.cat",ios::binary);
-	//åˆ›å»ºè¡¨çš„ä¿¡æ¯æ–‡ä»¶
-	out.write((char*)&total_len,sizeof(int));
-	for(int i=0;i<sql.attr_type.size();i++)
+	//table×ÜÊý¼Ó1
+	out.open(database_name + "\\" + table_name + "_table_info.cat", ios::binary);
+	int total_len = table.length();
+	//´´½¨±íµÄÐÅÏ¢ÎÄ¼þ
+	//out.write((char*)&total_len,sizeof(int));
+	unsigned int i = 0;
+	for (; i<table.attr_count; i++)
 	{
 		char attr_name[20];
-		strcpy(attr_name,sql.attr[i].c_str());
-		out.write(attr_name,20);
-		out.write((char*)&sql.attr_len[i],sizeof(int));
-		out.write((char*)&sql.attr_type[i],sizeof(int));
+		strcpy(attr_name, table.attrs[i].attr_name.c_str());
+		out.write(attr_name, 20);
+		out.write((char*)&table.attrs[i].attr_type, sizeof(int));
+		out.write((char*)&table.attrs[i].attr_key_type, sizeof(int));
+		out.write((char*)&table.attrs[i].attr_len, sizeof(int));
+		out.write((char*)&table.attrs[i].attr_id, sizeof(int));//½«±íµÄÊôÐÔÐÅÏ¢Ð´Èë
 	}
-	char attr_name[20];
-	strcpy(attr_name,sql.attr[i].c_str());
-	out.write(attr_name,20);
 	out.close();
-	//å°†å±žæ€§å†™åˆ°ç›¸åº”çš„è¡¨çš„ä¿¡æ¯æ–‡ä»¶ä¸­,æ ¼å¼ï¼šä¸€æ¡è®°å½•çš„æ€»ä½æ•°ï¼Œå±žæ€§å20ä¸ªå­—èŠ‚ï¼Œå±žæ€§å¯¹åº”è®°å½•çš„é•¿åº¦4ä¸ªå­—èŠ‚ï¼Œå±žæ€§ç±»åž‹4ä¸ªå­—èŠ‚
+	//½«ÊôÐÔÐ´µ½ÏàÓ¦µÄ±íµÄÐÅÏ¢ÎÄ¼þÖÐ,¸ñÊ½£ºÒ»Ìõ¼ÇÂ¼µÄ×ÜÎ»Êý£¬Ã¿¸öÊôÐÔÃû20¸ö×Ö½Ú£¬ÊôÐÔ¶ÔÓ¦µÄËÄ¸öÐÅÏ¢¸÷ËÄ¸ö×Ö½Ú£¬ËùÒÔ×ÜµÄ×Ö½ÚÊýÎª36£¬Ç°Ãæ¼ÓÒ»¸ö×ÜÎ»Êý¡£
 	return true;
 }
 
-bool droptable(interpreter& sql)
+Table CatalogManager::Read_Table_Info(string database_name, string table_name)
+{
+	ifstream in;
+	Table table;
+	table.table_name = table_name;
+	in.open(database_name + "\\" + table_name + "_table_info.cat", ios::binary);
+	int num_attr = 0;
+	while (!in.eof())
+	{
+		char attr_name[20];
+		in.read(attr_name, 20);
+		string s(attr_name, attr_name + strlen(attr_name));
+		table.attrs[num_attr].attr_name = s;
+		in.read((char*)&table.attrs[num_attr].attr_type, sizeof(int));
+		in.read((char*)&table.attrs[num_attr].attr_key_type, sizeof(int));
+		in.read((char*)&table.attrs[num_attr].attr_len, sizeof(int));
+		in.read((char*)&table.attrs[num_attr].attr_id, sizeof(int));//½«±íµÄÊôÐÔÐÅÏ¢Ð´Èë
+		num_attr++;
+	}
+	table.attr_count = num_attr;
+	return table;
+}
+
+bool CatalogManager::droptable(Table& table)
 {
 	ofstream out;
 	ifstream in;
 	string content;
-	string table_name=sql.name_table,database_name=sql.name_database;
-	if(!judge_table_exist(table_name,database_name)) //åˆ¤æ–­æ˜¯å¦å­˜åœ¨åŒåçš„è¡¨
+	int num_table;
+	string table_name = table.table_name, database_name = table.database_name;
+	if (!judge_table_exist(table_name, database_name)) //ÅÐ¶ÏÊÇ·ñ´æÔÚÍ¬ÃûµÄ±í
 	{
-		cout<<"the table does'nt exisit"<<endl;
+		cout << "the table does'nt exisit" << endl;
 		return false;
 	}
 	else
 	{
-		out.open(database_name+"\\"+database_name+"tablelist_new.txt",ios::binary);
-		in.open(database_name+"\\"+database_name+"tablelist.txt",ios::in);
-		while(!in.eof())
+		out.open(database_name + "\\" + database_name + "_tablelist_new.txt", ios::binary);
+		in.open(database_name + "\\" + database_name + "_tablelist.txt", ios::in);
+		while (!in.eof())
 		{
-			getline(in,content);
-			if(content!=table_name) out<<content;
+			getline(in, content);
+			if (content != table_name) out << content;
 		}
 		in.close();
 		out.close();
-		remove((database_name+"\\"+database_name+"tablelist.txt").c_str());
-		rename((database_name+"\\"+database_name+"tablelist_new.txt").c_str(),(database_name+"\\"+database_name+"tablelist.txt").c_str());
-		remove((database_name+"\\"+table_name+".blo").c_str());
-		remove((database_name+"\\"+table_name+"_table_info.cat").c_str());
-		remove((database_name+"\\"+table_name+"_index_info.idx").c_str());
-		remove((database_name+"\\"+table_name+"_numtable.txt").c_str());
-	};
-	return true;	
+		in.open(database_name + "\\" + database_name + "_numtable.txt", ios::in);
+		in >> num_table;
+		num_table--;
+		in.close();
+		out.open(database_name + "\\" + database_name + "_numtable.txt", ios::out);
+		out << num_table << "\t";
+		out.close();
+		remove((database_name + "\\" + database_name + "_tablelist.txt").c_str());
+		rename((database_name + "\\" + database_name + "_tablelist_new.txt").c_str(), (database_name + "\\" + database_name + "_tablelist.txt").c_str());
+		remove((database_name + "\\" + table_name + ".blo").c_str());
+		//remove((database_name+"\\"+table_name+"_table_info.cat").c_str());É¾³ýËùÓÐË÷ÒýÐÅÏ¢ÎÄ¼þ
+		remove((database_name + "\\" + table_name + "_index_info.idx").c_str());
+		return true;
+	}
 }
-bool judge_database_exist(string database_name)
+
+bool CatalogManager::judge_database_exist(string database_name)
 {
 	ifstream in;
-	char buffer[100]; 
+	char buffer[100];
 	string dbname;
-	in.open("Databaselist.txt",ios::in);
-	if(!in.is_open()) {cout<<"error with openfile"<<endl;return false;}
-	while(!in.eof())
+	in.open("Databaselist.txt", ios::in);
+	if (!in.is_open()) { cout << "error with openfile" << endl; return false; }
+	while (!in.eof())
 	{
-		in.getline(buffer,100);
-		dbname=buffer;
-		if(dbname==database_name) return true;
+		in.getline(buffer, 100);
+		dbname = buffer;
+		if (dbname == database_name) return true;
 	}
 	return false;
 }
 
-bool createdatabase(string database_name)
+/*bool CatalogManager::use(string database_name)
+{
+
+if(!judge_database_exist(database_name))
+{
+cout<<"the database dosen't exisit"<<endl;
+return false;
+}
+return true;
+}*/
+
+bool CatalogManager::createdatabase(string database_name)
 {
 	ofstream out;
-	if(judge_database_exist(database_name)) 
+	if (judge_database_exist(database_name))
 	{
-		cout<<"the database has already exisit"<<endl;
+		cout << "the database has already exisit" << endl;
 		return false;
 	}
 	else
 	{
-		out.open("Databaselist.txt",ios::app);
-		out<<database_name<<endl;
+		out.open("Databaselist.txt", ios::app);
+		out << database_name << endl;
 		out.close();
-		//æŠŠæ–°å¢žåŠ çš„databaseå†™åˆ°listæ–‡ä»¶é‡Œé¢
-		if(mkdir(database_name.c_str())==-1) 
+		//°ÑÐÂÔö¼ÓµÄdatabaseÐ´µ½listÎÄ¼þÀïÃæ
+		string cmd = "mkdir " + database_name;
+		if (system(cmd.c_str()) == -1)
 		{
-			cout<<"file create error"<<endl;
+			cout << "file create error" << endl;
 			return false;
 		}
-		//æ–°åˆ›ä¸€ä¸ªç›®å½•
-		out.open(database_name+"\\"+database_name+"tablelist.txt",ios::app);
+		//ÐÂ´´Ò»¸öÄ¿Â¼
+		out.open(database_name + "\\" + database_name + "_tablelist.txt", ios::app);//´´½¨ËùÓÐ±íµÄÐÅÏ¢
 		out.close();
-		out.open(database_name+"\\"+database_name+"indexlist.txt",ios::app);//åˆ›å»ºè¡¨çš„æ£€ç´¢ä¿¡æ¯æ–‡ä»¶
-		out.close();	
-		out.open(database_name+"\\"+database_name+"_numtable.txt",ios::app);
-		out<<0;
+		out.open(database_name + "\\" + database_name + "_indexlist.txt", ios::app);//´´½¨±íµÄ¼ìË÷ÐÅÏ¢ÎÄ¼þ
 		out.close();
-		//åˆ›å»ºä¸€ä¸ªtablelistçš„æ–‡ä»¶å’Œnumtableçš„æ–‡ä»¶
+		out.open(database_name + "\\" + database_name + "_numtable.txt", ios::app);//´´½¨Ò»¸ö¼ÇÂ¼±íÊýµÄÎÄ¼þ
+		out << 0;
+		out.close();
+		return true;
+		//´´½¨Ò»¸ötablelistµÄÎÄ¼þºÍnumtableµÄÎÄ¼þ
 	}
-	return false;
 }
-bool dropdatabase(string database_name)
+
+bool CatalogManager::dropdatabase(string database_name)
 {
 	ofstream out;
 	ifstream in;
 	string content;
-	if(!judge_database_exist(database_name))
+	if (!judge_database_exist(database_name))
 	{
-		cout<<"the database does'nt exisit"<<endl;
+		cout << "the database does'nt exisit" << endl;
 		return false;
 	}
 	else
 	{
-		out.open("Databaselist_new.txt",ios::binary);
-		in.open("Databaselist.txt",ios::in);
-		while(!in.eof())
+		out.open("Databaselist_new.txt", ios::binary);
+		in.open("Databaselist.txt", ios::in);
+		while (!in.eof())
 		{
-			getline(in,content);
-			if(content!=database_name) out<<content;
+			getline(in, content);
+			if (content != database_name) out << content;
 		}
 		in.close();
 		out.close();
 		remove("Databaselist.txt");
-		rename("Databaselist_new.txt","Databaselist.txt");
-		if(rmdir(database_name.c_str())==-1) cout<<"file delete error"<<endl;
+		rename("Databaselist_new.txt", "Databaselist.txt");
+		string cmd = "rmdir " + database_name;
+		if (system(cmd.c_str()) == -1) cout << "file delete error" << endl;
 	}
-	return true;	
+	return true;
 }
-bool judge_index_exist(interpreter &sql)
-{
+
+bool CatalogManager::judge_index_exist(Index &index)//ÔÙÉÌÁ¿£¬ÐèÒªÒ»¸ödbname
 {
 	ifstream in;
-	string database_name=sql.name_database,table_name=sql.name_table;
-	string	name_index,name_attr,name_table;
-	in.open(database_name+"\\"+database_name+"indexlist.txt",ios::in);
-	if(!in.is_open()) cout<<"open indexlist file error"<<endl;
-	while(!in.eof())
+	string database_name = index.database_name;
+	string	name_index, name_attr, name_table;
+	in.open(database_name + "\\" + database_name + "_indexlist.txt", ios::in);
+	if (!in.is_open()) cout << "open indexlist file error" << endl;
+	while (!in.eof())
 	{
-		in>>name_index>>name_table>>name_attr;
-		if(name_index==sql.name_index&&name_table==sql.name_table) return true;
+		in >> name_index >> name_table >> name_attr;
+		if (name_index == index.index_name) return true;
 	}
 	return false;
-}	
 }
-bool createindex(interpreter& sql)
+
+bool CatalogManager::createindex(Index &index)
 {
 	ofstream out;
-	string database_name=sql.name_database;
-	if(judge_index_exist(sql)) 
+	string database_name = index.database_name;
+	if (judge_index_exist(index))
 	{
-		cout<<"the index has already exisit"<<endl;
+		cout << "the index has already exisit" << endl;
 		return false;
 	}
-	out.open(database_name+"\\"+database_name+"indexlist.txt",ios::app);
-	out<<sql.name_index<<"\t"<<sql.name_table<<"\t"<<sql.attr[]<<endl;
+	out.open(database_name + "\\" + database_name + "_indexlist.txt", ios::app);
+	out << index.index_name << "\t" << index.table_name << "\t" << index.attr_name << endl;
 	out.close();
-	return true;	   
+	out.open(database_name + "\\" + index.table_name + "_" + index.attr_name + ".idx", ios::binary);//´´½¨±íµÄ¼ÇÂ¼ÎÄ¼þ
+	out.close();
+	return true;
 }
-bool dropindex(interpreter& sql)
+
+Index CatalogManager::Read_Index_Info(string &database_name, string &index_name)
+{
+	ifstream in;
+	Index index;
+	in.open(database_name + "\\" + database_name + "_indexlist.txt", ios::app);
+	while (!in.eof())
+	{
+		in >> index.index_name >> index.table_name >> index.attr_name;
+		if (index.index_name == index_name) return index;
+	}
+}
+
+vector<Index> CatalogManager::Read_Index_Info(string &database_name)
+{
+	ifstream in;
+	Index index;
+	vector<Index> indexs;
+	in.open(database_name + "\\" + database_name + "_indexlist.txt", ios::app);
+	while (!in.eof())
+	{
+		in >> index.index_name >> index.table_name >> index.attr_name;
+		indexs.push_back(index);
+	}
+	return indexs;
+}
+
+bool CatalogManager::dropindex(Index &index)
 {
 	ofstream out;
 	ifstream in;
-	string	name_index,name_table;
+	string	name_index, name_table;
+	string database_name = index.database_name;
 	char name_attr[20];
-	if(!judge_index_exist(sql))
+	if (!judge_index_exist(index))
 	{
-		cout<<"the index does'nt exisit"<<endl;
+		cout << "the index doesn't exisit" << endl;
 		return false;
 	}
-	in.open(database_name+"\\"+database_name+"indexlist.txt",ios::in);
-	if(!in.is_open()) {cout<<"file _index_info open error"<<endl;return false;}
-	out.open(database_name+"\\"+database_name+"indexlist_new.txt",ios::binary);
-	while(!in.eof())
+	in.open(database_name + "\\" + database_name + "_indexlist.txt", ios::in);
+	if (!in.is_open()) { cout << "file _index_info open error" << endl; return false; }
+	out.open(database_name + "\\" + database_name + "_indexlist_new.txt", ios::binary);
+	while (!in.eof())
 	{
-		in>>name_index>>name_attr>>name_table;
-		if(name_index!=sql.name_index) out<<name_index<<"\t"<<name_table<<"\t"<<name_attr<<endl;		
+		in >> name_index >> name_attr >> name_table;
+		if (name_index != index.index_name) out << name_index << "\t" << name_table << "\t" << name_attr << endl;
 	}
-	remove((database_name+"\\"+database_name+"indexlist.txt").c_str());
-	rename((database_name+"\\"+database_name+"indexlist_new.txt").c_str(),(database_name+"\\"+database_name+"indexlist.txt").c_str());
-	return true;	
-}
-
-int judge_type(string value)
-{
-	char a[20];
-	strcpy(a,value.c_str());
-	if(a[0]=='\''||a[0]=='\"')
-		return 3;
-	else 
-	{
-		for(int i=0;i<value.size();i++)
-			if(a[i]=='.')
-				return 2;
-
-	}
-	else return 1;
-}
-bool judge_value_match(interpreter& sql)
-{
-	ifstream in;
-	int i=0;
-	int len,total_len,type,type_true;
-	char name[20];
-	in.open(sql.name_database+"\\"+sql.name_table+"_table_info.cat",ios::in);
-	if(!in.is_open())
-	{
-		cout<<"table info file open error"<<endl;
-		return false;
-	}
-	in.read((char*)&total_len,4);
-	while(total_len>0)
-	{
-		in.read(name,20);
-		in.read((char*)&len,4);
-		in.read((char*)&type,4);
-		type_true=judge_type(sql.value[i]);
-		total_len-=len;
-		if(!(type==type_true||(type==2&&type_true==1))) return false;		
-	}
+	out.close();
+	in.close();
+	remove((database_name + "\\" + database_name + "_indexlist.txt").c_str());
+	rename((database_name + "\\" + database_name + "_indexlist_new.txt").c_str(), (database_name + "\\" + database_name + "_indexlist.txt").c_str());
+	remove((database_name + "\\" + index.table_name + "_" + index.attr_name + ".idx").c_str());
 	return true;
 }
-bool judge_condition_value_match(interpreter& sql)
-{
-	ifstream in;
-	int i=0,type=0;
-	int len,total_len,type_true;
-	char name[20];
-	in.open(sql.name_database+"\\"+sql.namw_table+"_table_info.cat",ios::in);
-	if(!in.is_open())
-	{
-		cout<<"table info file open error"<<endl;
-		return false;
-	}
-	in.read((char*)&total_len,4);
-	while(total_len>0)
-	{
-		in.read(name,20);
-		in.read((char*)&len,4);
-		in.read((char*)&type,4);
-		type_true=judge_type(sql.value[i]);
-		total_len-=len;
-		if(!(type==type_true||(type==2&&type_true==1))) return false;		
-	}
-	return true;
-}
-bool judge_attr_exsit(interpreter& sql)
-{
-	ifstream in;
-	int i=0,type=0;
-	int len,total_len,type_true;
-	char name[20];
-	vector<string> attr_table;
-	in.open(sql.name_database+"\\"+sql.name_table+"_table_info.cat",ios::in);
-	if(!in.is_open())
-	{
-		cout<<"table info file open error"<<endl;
-		return false;
-	}
-	in.read((char*)&total_len,4);
-	while(total_len>0)
-	{
-		in.read(name,20);
-		in.read((char*)&len,4);
-		in.read((char*)&type,4);
-		total_len-=len;
-		string name_str(name,name+strlen(name));
-		attr_table.push_back(name_str);			
-	}
-	int j=0;
-	for(int i=0;i<sql.attr.size();i++)
-	{
-		for(j=0;j<attr_table.size();j++)
-		{
-			if(sql.attr[i]==attr_table[j]) break;
-		}
-		if(j==attr_table.size()) return false;
-	}
-	return true;
-}
-bool judge_condition_attr_exsit(interpreter& sql)
-{
-	ifstream in;
-	int i=0,type=0;
-	int len,total_len,type_true;
-	char name[20];
-	vector<string> attr_table;
-	in.open(sql.name_database+"\\"+sql.name_table+"_table_info.cat",ios::in);
-	if(!in.is_open())
-	{
-		cout<<"table info file open error"<<endl;
-		return false;
-	}
-	in.read((char*)&total_len,4);
-	while(total_len>0)
-	{
-		in.read(name,20);
-		in.read((char*)&len,4);
-		in.read((char*)&type,4);
-		total_len-=len;
-		string name_str(name,name+strlen(name));
-		attr_table.push_back(name_str);			
-	}
-	int j=0;
-	for(int i=0;i<sql.condition_attr.size();i++)
-	{
-		for(j=0;j<attr_table.size();j++)
-		{
-			if(sql.condition_attr[i]==attr_table[j]) break;
-		}
-		if(j==attr_table.size()) return false;
-	}
-	return true;
-}*/
