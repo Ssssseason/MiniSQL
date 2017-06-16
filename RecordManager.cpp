@@ -103,16 +103,17 @@ int RecordManager::insert(Tuple&tuple)//插入到内存中，表名，数据库�
 	string database_name=tuple.database_name,table_name=tuple.table_name;
 	int num=0;
 	Block* block;
-	for(int i=0;i<block_record.file_block(database_name+"\\"+table_name+".blo");i++)
+	int file_num = block_record.file_block(database_name + "\\" + table_name + ".blo");
+	for(int i=0;i<file_num;i++)
 	{
-		block=block_record.find_block((database_name+"\\"+table_name+".blo"),i*4096);	
 		num=i;		
 	}
+	block = block_record.find_block((database_name + "\\" + table_name + ".blo"), num * 4096);
     char* record=block->get_record();//block->record;
 	int i;
 	for(i=0;i<4096;)
 	{
-		if(*(char*)record==NULL)
+		if(*(char*)(record+i)==NULL)
 			break;
 		i+=128;
 	}
@@ -120,7 +121,7 @@ int RecordManager::insert(Tuple&tuple)//插入到内存中，表名，数据库�
 	int total_len=0;
 	char name[20];
 	string value_char;
-	for(int j=0;i<tuple.attr_count;j++)
+	for(int j=0;j<tuple.attr_count;j++)
 	{
 		if(tuple.attrs[j].attr_type==1)
 		{
@@ -131,8 +132,8 @@ int RecordManager::insert(Tuple&tuple)//插入到内存中，表名，数据库�
 		else if(tuple.attrs[j].attr_type==2)
 		{
 			*(float*)record=atof(tuple.attr_values[j].c_str());
-			record+=8;
-			total_len+=8;
+			record+=4;
+			total_len+=4;
 		}
 		else
 		{
@@ -140,11 +141,13 @@ int RecordManager::insert(Tuple&tuple)//插入到内存中，表名，数据库�
 			value_char= tuple.attr_values[j];
 			strcpy(value,value_char.c_str());
 			*(char**)record=value;
-			block+=tuple.attrs[j].attr_len;
+			record+=tuple.attrs[j].attr_len;
+			total_len += tuple.attrs[j].attr_len;
 		}
 	}
 	for(int j=total_len;j<128;j++)
 		*(char*)(record+j)=deletevalue;
+	block->set_dirty();
 	return (num-1)*4096+i;
 }
 

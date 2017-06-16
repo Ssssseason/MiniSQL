@@ -44,7 +44,7 @@ Table Transform::createTable(const string &SQL) {
 			else if (attrLen == "-") { // FLOAT
 				tbl.attrs[i - 1].attr_name = attrName;
 				tbl.attrs[i - 1].attr_type = FLOAT;
-				tbl.attrs[i - 1].attr_len = 8;
+				tbl.attrs[i - 1].attr_len = 4;
 				tbl.attrs[i - 1].attr_id = i - 1;
 				ss >> tbl.attrs[i - 1].attr_key_type;
 			}

@@ -1,10 +1,10 @@
 #pragma once
 
 //#include "interpreter.hpp"
+#include "stdafx.h"
 #include "MiniSQL.h"
 #include <string>
 #include <fstream>
-#include "stdafx.h"
 
 class CatalogManager {
 public:

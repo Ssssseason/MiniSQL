@@ -68,13 +68,14 @@ Table CatalogManager::Read_Table_Info(string database_name, string table_name)
 	int data;
 	table.database_name = database_name;
 	table.table_name = table_name;
+	//in.open("db\\test", ios::binary);
 	in.open(database_name + "\\" + table_name + "_table_info.cat", ios::binary);
 	int num_attr = 0;
-	while (!in.eof())
+	char attr_name[20];
+	while (in.read(attr_name, 20))
 	{
-		char attr_name[20];
 
-		in.read(attr_name, 20);
+		//in.read(attr_name, 20);
 		string s(attr_name, attr_name + strlen(attr_name));
 		table.attrs[num_attr].attr_name = s;
 		in.read((char*)&table.attrs[num_attr].attr_type, sizeof(int));

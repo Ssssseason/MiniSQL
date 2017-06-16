@@ -649,149 +649,306 @@ string drop_clause(string SQL, int start)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 //分解选择条件是否有效
-string select_condition(string T){
+/////////////////////////////////////////////////////////////////////////////////////////////
+//分解选择条件是否有效
+string select_condition(string T) {
 	int start, index, end, m1, m2;
 	string temp1, temp2;
 	start = 0;
 	end = T.length() - 1;
 	while ((T[end] == ' ') || (T[end] == '\'')) end--;
-	if ((index=T.find(">=")) != -1){//如果有大于等于号
+
+	if ((index = T.find(">=")) != -1) {//如果有大于等于号
 		m1 = index - 1;
-		while (m1 >= start&&((T[m1] == ' ')||(T[m1]=='\''))) m1--;
-		if (m1 < start){
+		while (m1 >= start && ((T[m1] == ' ') || (T[m1] == '\''))) m1--;
+		if (m1 < start) {
 			T = "99";
 			return T;
 		}
 		m2 = index + 2;
-		while (m2 <= end&&((T[m2] == ' ')||(T[m2]=='\''))) m2++;
-		if (m2 > end){
+		while (m2 <= end && ((T[m2] == ' ') || (T[m2] == '\''))) m2++;
+		if (m2 > end) {
 			T = "99";
 			return T;
 		}
 		temp1 = T.substr(start, m1 - start + 1);
 		temp2 = T.substr(m2, end - m2 + 1);
-		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)){
+		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)) {
 			T = "99";
 			return T;
 		}
 		else
 			T = temp1 + " >= " + temp2;
 	}
-	else if ((index = T.find("<=")) != -1){
+
+	else if ((index = T.find("<=")) != -1) {
 		m1 = index - 1;
-		while (m1 >= start&&((T[m1] == ' ')||(T[m1]=='\''))) m1--;
-		if (m1 < start){
+		while (m1 >= start && ((T[m1] == ' ') || (T[m1] == '\''))) m1--;
+		if (m1 < start) {
 			T = "99";
 			return T;
 		}
 		m2 = index + 2;
-		while (m2 <= end&&((T[m2] == ' ')||(T[m2]=='\''))) m2++;
-		if (m2 > end){
+		while (m2 <= end && ((T[m2] == ' ') || (T[m2] == '\''))) m2++;
+		if (m2 > end) {
 			T = "99";
 			return T;
 		}
 		temp1 = T.substr(start, m1 - start + 1);
 		temp2 = T.substr(m2, end - m2 + 1);
-		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)){
+		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)) {
 			T = "99";
 			return T;
 		}
 		else
 			T = temp1 + " <= " + temp2;
 	}
-	else if ((index = T.find(">")) != -1){
+
+	else if ((index = T.find("<>")) != -1 || (index = T.find("!=")) != -1) {
 		m1 = index - 1;
-		while (m1 >= start&&((T[m1] == ' ')||(T[m1]=='\''))) m1--;
-		if (m1 < start){
-			T = "99";
-			return T;
-		}
-		m2 = index + 1;
-		while (m2 <= end&&((T[m2] == ' ')||(T[m2]=='\''))) m2++;
-		if (m2 > end){
-			T = "99";
-			return T;
-		}
-		temp1 = T.substr(start, m1 - start + 1);
-		temp2 = T.substr(m2, end - m2 + 1);
-		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)){
-			T = "99";
-			return T;
-		}
-		else
-			T = temp1 + " >> " + temp2;
-	}
-	else if ((index = T.find("<")) != -1){
-		m1 = index - 1;
-		while (m1 >= start&&((T[m1] == ' ')||(T[m1]=='\''))) m1--;
-		if (m1 < start){
-			T = "99";
-			return T;
-		}
-		m2 = index + 1;
-		while (m2 <= end&&((T[m2] == ' ')||(T[m2]=='\''))) m2++;
-		if (m2 > end){
-			T = "99";
-			return T;
-		}
-		temp1 = T.substr(start, m1 - start + 1);
-		temp2 = T.substr(m2, end - m2 + 1);
-		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)){
-			T = "99";
-			return T;
-		}
-		else
-			T = temp1 + " << " + temp2;
-	}
-	else if ((index = T.find("<>")) != -1 || (index = T.find("!="))){
-		m1 = index - 1;
-		while (m1 >= start&&((T[m1] == ' ')||(T[m1]=='\''))) m1--;
-		if (m1 < start){
+		while (m1 >= start && ((T[m1] == ' ') || (T[m1] == '\''))) m1--;
+		if (m1 < start) {
 			T = "99";
 			return T;
 		}
 		m2 = index + 2;
-		while (m2 <= end&&((T[m2] == ' ')||(T[m2]=='\''))) m2++;
-		if (m2 > end){
+		while (m2 <= end && ((T[m2] == ' ') || (T[m2] == '\''))) m2++;
+		if (m2 > end) {
 			T = "99";
 			return T;
 		}
 		temp1 = T.substr(start, m1 - start + 1);
 		temp2 = T.substr(m2, end - m2 + 1);
-		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)){
+		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)) {
 			T = "99";
 			return T;
 		}
 		else
 			T = temp1 + " <> " + temp2;
 	}
-	else if ((index = T.find("=")) != -1){
+
+	else if ((index = T.find(">")) != -1) {
 		m1 = index - 1;
-		while (m1 >= start&&((T[m1] == ' ')||(T[m1]=='\''))) m1--;
-		if (m1 < start){
+		while (m1 >= start && ((T[m1] == ' ') || (T[m1] == '\''))) m1--;
+		if (m1 < start) {
 			T = "99";
 			return T;
 		}
 		m2 = index + 1;
-		while (m2 <= end&&((T[m2] == ' ')||(T[m2]=='\''))) m2++;
-		if (m2 > end){
+		while (m2 <= end && ((T[m2] == ' ') || (T[m2] == '\''))) m2++;
+		if (m2 > end) {
 			T = "99";
 			return T;
 		}
 		temp1 = T.substr(start, m1 - start + 1);
 		temp2 = T.substr(m2, end - m2 + 1);
-		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)){
+		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)) {
+			T = "99";
+			return T;
+		}
+		else
+			T = temp1 + " >> " + temp2;
+	}
+
+	else if ((index = T.find("<")) != -1) {
+		m1 = index - 1;
+		while (m1 >= start && ((T[m1] == ' ') || (T[m1] == '\''))) m1--;
+		if (m1 < start) {
+			T = "99";
+			return T;
+		}
+		m2 = index + 1;
+		while (m2 <= end && ((T[m2] == ' ') || (T[m2] == '\''))) m2++;
+		if (m2 > end) {
+			T = "99";
+			return T;
+		}
+		temp1 = T.substr(start, m1 - start + 1);
+		temp2 = T.substr(m2, end - m2 + 1);
+		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)) {
+			T = "99";
+			return T;
+		}
+		else
+			T = temp1 + " << " + temp2;
+	}
+
+	else if ((index = T.find("=")) != -1) {
+		m1 = index - 1;
+		while (m1 >= start && ((T[m1] == ' ') || (T[m1] == '\''))) m1--;
+		if (m1 < start) {
+			T = "99";
+			return T;
+		}
+		m2 = index + 1;
+		while (m2 <= end && ((T[m2] == ' ') || (T[m2] == '\''))) m2++;
+		if (m2 > end) {
+			T = "99";
+			return T;
+		}
+		temp1 = T.substr(start, m1 - start + 1);
+		temp2 = T.substr(m2, end - m2 + 1);
+		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)) {
 			T = "99";
 			return T;
 		}
 		else
 			T = temp1 + " == " + temp2;
 	}
-	else{
+
+	else {
 		T = "99";
 	}
+
 	return T;
 }
+
+
+
+//
+//string select_condition(string T){
+//	int start, index, end, m1, m2;
+//	string temp1, temp2;
+//	start = 0;
+//	end = T.length() - 1;
+//	while ((T[end] == ' ') || (T[end] == '\'')) end--;
+//	if ((index=T.find(">=")) != -1){//如果有大于等于号
+//		m1 = index - 1;
+//		while (m1 >= start&&((T[m1] == ' ')||(T[m1]=='\''))) m1--;
+//		if (m1 < start){
+//			T = "99";
+//			return T;
+//		}
+//		m2 = index + 2;
+//		while (m2 <= end&&((T[m2] == ' ')||(T[m2]=='\''))) m2++;
+//		if (m2 > end){
+//			T = "99";
+//			return T;
+//		}
+//		temp1 = T.substr(start, m1 - start + 1);
+//		temp2 = T.substr(m2, end - m2 + 1);
+//		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)){
+//			T = "99";
+//			return T;
+//		}
+//		else
+//			T = temp1 + " >= " + temp2;
+//	}
+//	else if ((index = T.find("<=")) != -1){
+//		m1 = index - 1;
+//		while (m1 >= start&&((T[m1] == ' ')||(T[m1]=='\''))) m1--;
+//		if (m1 < start){
+//			T = "99";
+//			return T;
+//		}
+//		m2 = index + 2;
+//		while (m2 <= end&&((T[m2] == ' ')||(T[m2]=='\''))) m2++;
+//		if (m2 > end){
+//			T = "99";
+//			return T;
+//		}
+//		temp1 = T.substr(start, m1 - start + 1);
+//		temp2 = T.substr(m2, end - m2 + 1);
+//		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)){
+//			T = "99";
+//			return T;
+//		}
+//		else
+//			T = temp1 + " <= " + temp2;
+//	}
+//	else if ((index = T.find(">")) != -1){
+//		m1 = index - 1;
+//		while (m1 >= start&&((T[m1] == ' ')||(T[m1]=='\''))) m1--;
+//		if (m1 < start){
+//			T = "99";
+//			return T;
+//		}
+//		m2 = index + 1;
+//		while (m2 <= end&&((T[m2] == ' ')||(T[m2]=='\''))) m2++;
+//		if (m2 > end){
+//			T = "99";
+//			return T;
+//		}
+//		temp1 = T.substr(start, m1 - start + 1);
+//		temp2 = T.substr(m2, end - m2 + 1);
+//		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)){
+//			T = "99";
+//			return T;
+//		}
+//		else
+//			T = temp1 + " >> " + temp2;
+//	}
+//	else if ((index = T.find("<")) != -1){
+//		m1 = index - 1;
+//		while (m1 >= start&&((T[m1] == ' ')||(T[m1]=='\''))) m1--;
+//		if (m1 < start){
+//			T = "99";
+//			return T;
+//		}
+//		m2 = index + 1;
+//		while (m2 <= end&&((T[m2] == ' ')||(T[m2]=='\''))) m2++;
+//		if (m2 > end){
+//			T = "99";
+//			return T;
+//		}
+//		temp1 = T.substr(start, m1 - start + 1);
+//		temp2 = T.substr(m2, end - m2 + 1);
+//		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)){
+//			T = "99";
+//			return T;
+//		}
+//		else
+//			T = temp1 + " << " + temp2;
+//	}
+//	else if ((index = T.find("<>")) != -1 || (index = T.find("!="))){
+//		m1 = index - 1;
+//		while (m1 >= start&&((T[m1] == ' ')||(T[m1]=='\''))) m1--;
+//		if (m1 < start){
+//			T = "99";
+//			return T;
+//		}
+//		m2 = index + 2;
+//		while (m2 <= end&&((T[m2] == ' ')||(T[m2]=='\''))) m2++;
+//		if (m2 > end){
+//			T = "99";
+//			return T;
+//		}
+//		temp1 = T.substr(start, m1 - start + 1);
+//		temp2 = T.substr(m2, end - m2 + 1);
+//		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)){
+//			T = "99";
+//			return T;
+//		}
+//		else
+//			T = temp1 + " <> " + temp2;
+//	}
+//	else if ((index = T.find("=")) != -1){
+//		m1 = index - 1;
+//		while (m1 >= start&&((T[m1] == ' ')||(T[m1]=='\''))) m1--;
+//		if (m1 < start){
+//			T = "99";
+//			return T;
+//		}
+//		m2 = index + 1;
+//		while (m2 <= end&&((T[m2] == ' ')||(T[m2]=='\''))) m2++;
+//		if (m2 > end){
+//			T = "99";
+//			return T;
+//		}
+//		temp1 = T.substr(start, m1 - start + 1);
+//		temp2 = T.substr(m2, end - m2 + 1);
+//		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)){
+//			T = "99";
+//			return T;
+//		}
+//		else
+//			T = temp1 + " == " + temp2;
+//	}
+//	else{
+//		T = "99";
+//	}
+//	return T;
+//}
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 //验证select_where语句是否有效
@@ -1685,7 +1842,11 @@ string Interpreter(string statement)
 	//若为quit语句
 	else if (temp == "quit") {
 		SQL = quit_clause(SQL, start);
-		if (SQL == "90") online = 0;
+		if (SQL == "90") 
+		{
+			online = 0;
+			block_record.flush();
+		}
 	}
 	//获取帮助
 	else if (temp == "help") {
