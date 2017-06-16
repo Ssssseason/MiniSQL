@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "leafnode.h"
 
 // CLeafNode
@@ -42,7 +43,7 @@ void LeafNode::setData(int i, const DataType& data){
 void LeafNode::insert(KeyType key, const DataType& data){
     int i;
     //插入排序的策略
-    for (i=m_KeyNum; i>=1 and m_KeyValues[i-1]>key; --i)
+    for (i=m_KeyNum; i>=1 && m_KeyValues[i-1]>key; --i)
     {
         setKeyValue(i, m_KeyValues[i-1]);
         setData(i, m_Datas[i-1]);

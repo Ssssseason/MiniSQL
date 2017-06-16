@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "internalnode.h"
 
 InternalNode::InternalNode():Node(){

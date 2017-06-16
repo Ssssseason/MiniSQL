@@ -5,7 +5,7 @@
 #include "MiniSQL.h"
 #include <string>
 #include <fstream>
-//#include "stdafx.h"
+#include "stdafx.h"
 
 class CatalogManager {
 public:

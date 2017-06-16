@@ -1,6 +1,7 @@
 #ifndef INTERNALNODE_H
 #define INTERNALNODE_H
 
+#include "../stdafx.h"
 #include "node.h"
 
 //内结点

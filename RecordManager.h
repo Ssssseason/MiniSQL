@@ -6,7 +6,7 @@
 #include "MiniSQL.h"
 #include "indexmanager.h"
 #include <vector>
-BufferManager block_record;
+extern BufferManager block_record;
 const char deletevalue = 1;
 class RecordManager {
 public:

@@ -1,8 +1,8 @@
-//#include "stdafx.h"
+#include "stdafx.h"
 #include "API.h"
 
 
-BufferManager myBuff;
+BufferManager block_record;
 
 void API::createTable(Table &table) {
 	// Create table in catalog manager.

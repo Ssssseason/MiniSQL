@@ -1,6 +1,7 @@
 #ifndef LEAFNODE_H
 #define LEAFNODE_H
 
+#include "../stdafx.h"
 #include "node.h"
 #include "internalnode.h"
 

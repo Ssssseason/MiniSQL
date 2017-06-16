@@ -1,6 +1,7 @@
 #ifndef BPLUS_TREE_H
 #define BPLUS_TREE_H
 
+#include "stdafx.h"
 #include "node.h"
 #include "leafnode.h"
 #include "internalnode.h"

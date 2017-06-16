@@ -1,4 +1,4 @@
-//#include "stdafx.h"
+#include "stdafx.h"
 #include"Interpreter.h"
 #include "transfrom.h"
 #include "API.h"
