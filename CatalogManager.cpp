@@ -65,16 +65,22 @@ Table CatalogManager::Read_Table_Info(string database_name, string table_name)
 {
 	ifstream in;
 	Table table;
+	int data;
+	table.database_name = database_name;
 	table.table_name = table_name;
 	in.open(database_name + "\\" + table_name + "_table_info.cat", ios::binary);
 	int num_attr = 0;
 	while (!in.eof())
 	{
 		char attr_name[20];
+
 		in.read(attr_name, 20);
 		string s(attr_name, attr_name + strlen(attr_name));
 		table.attrs[num_attr].attr_name = s;
 		in.read((char*)&table.attrs[num_attr].attr_type, sizeof(int));
+
+		//in.read((char*)&data, sizeof(int));
+		//cout << data << endl;
 		in.read((char*)&table.attrs[num_attr].attr_key_type, sizeof(int));
 		in.read((char*)&table.attrs[num_attr].attr_len, sizeof(int));
 		in.read((char*)&table.attrs[num_attr].attr_id, sizeof(int));//将表的属性信息写入

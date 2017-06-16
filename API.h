@@ -17,6 +17,7 @@ typedef Condition_list condList;
 
 class API {
 public:
+	API();
 	CatalogManager myCatalog;
 	IndexManager myIndex;
 	RecordManager myRecord;

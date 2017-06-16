@@ -4,6 +4,11 @@
 
 BufferManager block_record;
 
+API::API(): DBName("db"){
+
+}
+
+
 void API::createTable(Table &table) {
 	// Create table in catalog manager.
 	table.database_name = DBName;

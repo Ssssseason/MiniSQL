@@ -31,6 +31,7 @@ Table Transform::createTable(const string &SQL) {
 		ss >> attrName >> attrLen;
 		if (attrLen == "#") { // PK
 			PKflag = 1;
+			break;
 		}
 		else {
 			if (attrLen == "+") { // INT

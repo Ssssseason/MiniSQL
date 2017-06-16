@@ -2,28 +2,6 @@
 #include "RecordManager.h"
 #include <sstream>
 
-//#include "BufferManager.h"
-//#include "MiniSQL.h"
-//#include "indexmanager.h"
-//#include <vector>
-//#include <fstream>
-//
-//BufferManager block_record;
-//const char deletevalue=1;
-//
-//class RecordManager {
-//public:
-//	string memory_read(char*& block, int type, int len);
-//	int insert(Tuple&tuple);
-//	vector<string> selectTuple(Table &table, condList &cList);
-//	vector<string> selectTuple_index(Table &table, condList &cList, vector<int> offset);
-//	vector<keyOffsetNode> selectTuple_createindex(Table &table, Index& index);
-//	bool delete_noconditon(Table& table);
-//	vector<keyOffsetNode> deleteTuple(Table& table, condList &cList, vector<string> index_name);
-//	vector<keyOffsetNode> deleteTuple_index(Table& table, condList &cList, vector<int> offset);
-//	bool judge_condition(string op, string value_judge, string value, int type);
-//};
-
 bool RecordManager::judge_condition(string op, string value_judge, string value, int type)
 {
 	int value_int, value_judge_int;
@@ -343,7 +321,6 @@ vector<keyOffsetNode> RecordManager::deleteTuple(Table& table, condList &cList, 
 		int len,total_len,type,size=0,condition_judge=0;
 		string attr_value;
 		char name[20];
-        //int size=0;
 		char*record_attr;
 		vector<string> value;
 		int temp = 0;
@@ -405,7 +382,6 @@ vector<keyOffsetNode> RecordManager::deleteTuple_index(Table& table, condList &c
         int len, total_len, type, i = 0, size = 0, condition_judge = 0;
         string attr_value;
         char name[20];
-//		int size = 0;
         vector<string> attr_name;
         vector<string> value;
         keyOffsetNode node;
