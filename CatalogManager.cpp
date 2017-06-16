@@ -261,6 +261,8 @@ Index CatalogManager::Read_Index_Info(string &database_name, string &index_name)
 		in >> index.index_name >> index.table_name >> index.attr_name;
 		if (index.index_name == index_name) return index;
 	}
+	Index i;
+	return i;
 }
 
 vector<Index> CatalogManager::Read_Index_Info(string &database_name)
