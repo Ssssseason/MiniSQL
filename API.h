@@ -21,9 +21,9 @@ public:
 	IndexManager myIndex;
 	RecordManager myRecord;
 	void createTable(Table &table);
-	void dropTable(const string &tableName);
+    void dropTable(string &tableName);
 	void createIndex(Index &index);
-	void dropIndex(const string &indexName);
+    void dropIndex(string &indexName);
 	void insertTuple(string tableName, vector<string> values);
 	void selectTuple(string &tableName, string &attrName, condList &cList);
 	void deleteTuple(string &tableName, condList &cList);

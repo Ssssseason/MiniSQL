@@ -1,17 +1,20 @@
-#include "stdafx.h"
+//#include "stdafx.h"
 #include "Interpreter.h"
 #include "MiniSQL.h"
 #include "transfrom.h"
 #include "iostream"
+#include "API.h"
+
 using namespace std;
+API myAPI;
 Transform myT;
 bool online = 1;
 
-void main()
+int main()
 {
 	string SQL;
 	//打印软件信息
-	cout << endl;
+    cout << endl;
 	cout << "\t\t***********************************************" << endl;
 	cout << "\t\t             欢迎使用 MiniSQL !" << endl;
 	cout << "\t\t               Version (1.0)  " << endl;
@@ -27,5 +30,5 @@ void main()
 //		API_Module(SQL);
 		cout << SQL << endl;
 	}
-	cout << "\t\t              谢谢使用，再见！ " << endl;
+    cout << "\t\t              谢谢使用，再见！ " << endl;
 }

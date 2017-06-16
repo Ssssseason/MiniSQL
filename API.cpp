@@ -1,4 +1,4 @@
-#include "stdafx.h"
+//#include "stdafx.h"
 #include "API.h"
 
 
@@ -34,7 +34,7 @@ void API::createTable(Table &table) {
 	}
 }
 
-void API::dropTable(const string &tableName) {
+void API::dropTable(string &tableName) {
 	// Read table info through catalog manager.
 	Table table = myCatalog.Read_Table_Info(DBName, tableName);
 	Index index;
@@ -73,7 +73,7 @@ void API::createIndex(Index &index) {
 	}
 }
 
-void API::dropIndex(const string &indexName) {
+void API::dropIndex(string &indexName) {
 	Index index = myCatalog.Read_Index_Info(DBName, indexName);
 	// 同create index
 	// index name , database name ,attrname, table name
@@ -133,13 +133,13 @@ void API::insertTuple(Tuple &tuple) {
 	}
 
 	// Insert tuple through record manager.
-	int offset = Insert(tuple);
+    DataType offset = myRecord.insert(tuple);//Insert(tuple);
 	// if (offset == -1) {
 	// 	cout << "Error: Duplicate entry '0' for key 'PRIMARY'";
 	// }
 	// else {
-		stringstream ss;
-		float key;
+//		stringstream ss;
+//		float key;
 		for (int i = 0; i < tuple.attr_count; i++) {
 			// Check index through index manager.
 			index.attr_name = tuple.attrs[i].attr_name;
@@ -178,8 +178,8 @@ void API::selectTuple(string &tableName, string &attrName, condList &cList) {
 	}
 
 	// 查询有索引的条件
-	vector<int> offset, a, b;
-	vector<int>::iterator offIt;
+    vector<DataType> offset, a, b;
+    vector<DataType>::iterator offIt;
 	if (!hasIndexList.empty()) {
 		it = hasIndexList.begin();
 		// search index in index manager
@@ -260,8 +260,8 @@ void API::deleteTuple(string &tableName, condList &cList) {
 		}
 	}
 
-	vector<int> offset, a, b;
-	vector<int>::iterator offIt;
+    vector<DataType> offset, a, b;
+    vector<DataType>::iterator offIt;
 	if (!hasIndexList.empty()) {
 		it = hasIndexList.begin();
 		// search index in index manager
@@ -302,7 +302,9 @@ void API::deleteTuple(string &tableName, condList &cList) {
 	vector<KeyOffset> records;
 	// Call record manager to delete tuples.
 	if(offset.empty()){
-		records = myRecord.deleteTuple(table, noIndexList);
+        //?
+        vector<string> index_name;
+        records = myRecord.deleteTuple(table, noIndexList,index_name);
 	}
 	else {
 		records = myRecord.deleteTuple_index(table, noIndexList, offset, attrNames);
@@ -324,7 +326,7 @@ void API::deleteTuple(string &tableName, condList &cList) {
 		for(int i = 0; i < attrNames.size(); i++){
 			for(int j = 0; j < delete_num; j++){
 				int k = i * delete_num + j;
-				myIndex.deleteRecord(DBName, tableName, attrNames[i], records[k]->key);
+                myIndex.deleteRecord(DBName, tableName, attrNames[i], records[k].key);
 			}
 		}
 	}

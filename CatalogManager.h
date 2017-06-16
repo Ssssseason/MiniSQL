@@ -5,21 +5,21 @@
 #include "MiniSQL.h"
 #include <string>
 #include <fstream>
-#include "stdafx.h"
+//#include "stdafx.h"
 
 class CatalogManager {
 public:
 	bool judge_table_exist(string table_name, string database_name);
 	bool createtable(Table& table);
-	Table Read_Table_info(string database_name, string table_name);
+    Table Read_Table_Info(string database_name, string table_name);
 	bool droptable(Table& table);
 	bool judge_database_exist(string database_name);
 	bool createdatabase(string database_name);
 	bool dropdatabase(string database_name);
 	bool judge_index_exist(Index &index);
 	bool createindex(Index &index);
-	Index Read_Index_info(string &database_name, string &index_name);
-	vector<Index> Read_Index_info(string &database_name);
+    Index Read_Index_Info(string &database_name, string &index_name);
+    vector<Index> Read_Index_Info(string &database_name);
 	bool dropindex(Index &index);
 };
 
@@ -84,7 +84,7 @@ bool CatalogManager::createtable(Table& table)
 	return true;
 }
 
-Table CatalogManager::Read_Table_info(string database_name,string table_name)
+Table CatalogManager::Read_Table_Info(string database_name,string table_name)
 {
 	ifstream in;
 	Table table;
@@ -187,7 +187,8 @@ bool CatalogManager::createdatabase(string database_name)
 		out<<database_name<<endl;
 		out.close();
 		//把新增加的database写到list文件里面
-		if(mkdir(database_name.c_str())==-1) 
+        string cmd = "mkdir "+ database_name;
+        if(system(cmd.c_str())==-1)
 		{
 			cout<<"file create error"<<endl;
 			return false;
@@ -228,7 +229,8 @@ bool CatalogManager::dropdatabase(string database_name)
 		out.close();
 		remove("Databaselist.txt");
 		rename("Databaselist_new.txt","Databaselist.txt");
-		if(rmdir(database_name.c_str())==-1) cout<<"file delete error"<<endl;
+        string cmd = "rmdir "+database_name;
+        if(system(cmd.c_str())==-1) cout<<"file delete error"<<endl;
 	}
 	return true;	
 }
@@ -265,7 +267,7 @@ bool CatalogManager::createindex(Index &index)
 	return true;	   
 }
 
-Index CatalogManager::Read_Index_info(string &database_name,string &index_name)
+Index CatalogManager::Read_Index_Info(string &database_name,string &index_name)
 {
 	ifstream in;
 	Index index;
@@ -277,7 +279,7 @@ Index CatalogManager::Read_Index_info(string &database_name,string &index_name)
 	} 
 }
 
-vector<Index> CatalogManager::Read_Index_info(string &database_name)
+vector<Index> CatalogManager::Read_Index_Info(string &database_name)
 {
 	ifstream in;
 	Index index;

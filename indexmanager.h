@@ -3,16 +3,17 @@
 
 
 #include "BPlusTree/bplustree.h"
-#include "BufferManager/BufferManager.h"
+#include "BufferManager.h"
 #include <map>
 #include <string>
 #include <iostream>
-
+#include "MiniSQL.h"
+/*
 struct keyOffsetNode{
     int key;
     DataType data;
 };
-
+*/
 typedef keyOffsetNode KeyOffset;
 
 class IndexManager{

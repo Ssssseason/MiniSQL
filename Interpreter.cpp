@@ -1,4 +1,4 @@
-#include "stdafx.h"
+//#include "stdafx.h"
 #include"Interpreter.h"
 #include "transfrom.h"
 #include "API.h"
@@ -31,7 +31,7 @@ string read_input()
 		}
 	}
 	//将输入大写转化为小写
-	transform(SQL.begin(), SQL.end(), SQL.begin(), tolower);
+    transform(SQL.begin(), SQL.end(), SQL.begin(), ::tolower);
 	//返回用户输入
 	return SQL;
 }
@@ -1297,7 +1297,7 @@ string file_line(string s){
 		s[s.length() - 1] = ' ';
 		s += ";";
 	}
-	transform(s.begin(), s.end(), s.begin(), tolower);
+    transform(s.begin(), s.end(), s.begin(), ::tolower);
 	while (s[start] == ' ')
 		start++;
 	end = s.find(' ', start);

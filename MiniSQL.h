@@ -1,9 +1,12 @@
 #pragma once
+#ifndef MINISQL_H
+#define MINISQL_H
+
 
 #include <iostream>
 #include <stdlib.h>
 #include <math.h>
-#include <direct.h>
+//#include <direct.h>
 #include <string>
 #include <sstream>
 #include <list>
@@ -16,8 +19,8 @@ using namespace std;
 #define FLOAT 2
 #define INT 1
 
-typedef float KeyType;
-typedef int DataType;
+typedef double KeyType;
+typedef long DataType;
 
 struct keyOffsetNode {
 	KeyType key; // Ù–‘÷µ
@@ -110,3 +113,6 @@ struct InsertInfo {
 	vector<string> values;
 	//string values[32];
 };
+
+
+#endif

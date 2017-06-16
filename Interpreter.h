@@ -1,4 +1,7 @@
 #pragma once
+#ifndef INTERPRETER_H
+#define INTERPRETER_H
+
 
 #include"MiniSQL.h"
 #include "transfrom.h"
@@ -39,3 +42,5 @@ string use_clause(string SQL, int start);
 string execfile_clause(string SQL, int start);
 //验证quit语句是否有效
 string quit_clause(string SQL, int start);
+
+#endif
