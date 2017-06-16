@@ -155,7 +155,8 @@ vector<string> RecordManager::selectTuple(Table &table, condList &cList)//无条
 {
 	string database_name= table.database_name,table_name= table.table_name;
 	vector<string> value;
-	for(int i=0;i<block_record.file_block(database_name+"\\"+table_name+".blo");i++)
+	int num = block_record.file_block(database_name + "\\" + table_name + ".blo");
+	for(int i=0;i<num;i++)
 	{
 		Block* block=block_record.find_block((database_name+"\\"+table_name+".blo"),i*4096);
         char* record=block->get_record();
@@ -350,7 +351,7 @@ vector<keyOffsetNode> RecordManager::deleteTuple(Table& table, condList &cList, 
 			}			
 			if(!temp) 
 			{
-				for(unsigned int j;j<value.size();j++)
+				for(unsigned int j=0;j<value.size();j++)
 				{
 					node.key=atof(value[i].c_str());
 					node.data=(i-1)*4096+size;
@@ -414,7 +415,7 @@ vector<keyOffsetNode> RecordManager::deleteTuple_index(Table& table, condList &c
         }
         if (!temp || !condition_judge)
         {
-            for (unsigned int j; j<value.size(); j++)
+            for (unsigned int j=0; j<value.size(); j++)
             {
                 node.key = atof(value[i].c_str());
                 node.data = offset[num_offset];

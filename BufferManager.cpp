@@ -118,7 +118,9 @@ void BufferManager::clear_file_buffer(const string file_name)
 const int BufferManager::file_block(string file_name)
 {
     fstream in(file_name, ios::in | ios::binary);
-    const int temp = (ios::end - ios::end) / Block::BLOCK_SIZE;
+	int a = ios::end;
+	int b = ios::beg;
+    const int temp = (ios::end - ios::beg) / Block::BLOCK_SIZE;
     in.close();
     return temp;
 }

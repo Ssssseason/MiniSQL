@@ -124,8 +124,8 @@ bool CatalogManager::droptable(Table& table)
 		remove((database_name + "\\" + database_name + "_tablelist.txt").c_str());
 		rename((database_name + "\\" + database_name + "_tablelist_new.txt").c_str(), (database_name + "\\" + database_name + "_tablelist.txt").c_str());
 		remove((database_name + "\\" + table_name + ".blo").c_str());
-		//remove((database_name+"\\"+table_name+"_table_info.cat").c_str());删除所有索引信息文件
-		remove((database_name + "\\" + table_name + "_index_info.idx").c_str());
+		remove((database_name+"\\"+table_name+"_table_info.cat").c_str());//删除所有索引信息文件
+		//remove((database_name + "\\" + table_name + "_index_info.idx").c_str());
 		return true;
 	}
 }
