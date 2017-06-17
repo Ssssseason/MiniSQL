@@ -109,11 +109,32 @@ string RecordManager::memory_read(char*& block,int type,int len)//从内存中�
 		delete value;
 		return value_str;
 	}
+} 
+vector<string> RecordManager::find_unique(Table& table,vector<int>& attr_id)//返回unique和primary的值的位置
+{
+	condList clist;
+	vector<string> value_return;//返回值
+	vector<string> value=selectTuple(table,clist);//select 的结果值
+	for(unsigned int i=0;i<table.attr_count;i++)
+		if(table.attrs[i].attr_key_type==UNIQUE||table.attrs[i].attr_key_type==UNIQUE)
+			attr_id.push_back(table.attrs[i].attr_id);
+	for(unsigned int i=0;i<value.size();i+=table.attr_count)
+		for(unsigned int j=0;j<attr_id.size();j++)
+			value_return.push_back(value[i+attr_id[j]]);//返回id对应的属性值
+	return value_return;
 }
-
 int RecordManager::insert(Tuple&tuple)//插入到内存中，表名，数据库名，
 {
-	string database_name=tuple.database_name,table_name=tuple.table_name;
+	database_name=tuple.database_name,table_name=tuple.table_name;
+	vector<int> attr_id;
+	vector<string> value=find_unique((Table*)tuple,attr_id);//找到那些有unique的值
+	for(unsigned int j=0;j<value.size();j+=attr_id.size())
+		for(unsigned int k=0;k<attr_id.size();k++)
+			if(tuple.attr_values[k]==value[j+k])
+			{
+				cout<<"the "<<tuple.attrs[attr_id[k]].attr_name<<tuple.attr_values[k]<<"is duplicate"<<endl;
+				return -1;
+			}
 	int num=0;
 	Block* block;
 	int file_num = block_record.file_block(database_name + "\\" + table_name + ".blo");
@@ -122,8 +143,7 @@ int RecordManager::insert(Tuple&tuple)//插入到内存中，表名，数据库�
 		num=i;		
 	}
 	block = block_record.find_block((database_name + "\\" + table_name + ".blo"), num * 4096);
-    char* record=block->get_record();//block->record;
-	
+    char* record=block->get_record();//block->record;	
 	int i;
 	for(i=0;i<4096;)
 	{

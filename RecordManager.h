@@ -21,6 +21,7 @@ public:
     vector<keyOffsetNode> deleteTuple_index(Table& table, condList &cList, vector<DataType> offset, vector<string> index_name);
 	int RecordManager::check(char* pos);
 	int RecordManager::test(char* pos);
+	vector<string> RecordManager::find_unique(Table& table,vector<int>& attr_id);
 };
 
 
