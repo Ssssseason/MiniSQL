@@ -1688,7 +1688,7 @@ string Interpreter(string statement)
 		}
 		else if (SQL.substr(0, 2) == "42") {
 			// col "where"
-			size_t pos;
+			size_t pos = 0;
 			string attrName = SQL.substr(2, pos - 2);
 			size_t nextPos = SQL.find(",", pos + 1);
 			string tblName = SQL.substr(pos + 1, nextPos - pos - 1);
@@ -1800,7 +1800,7 @@ string Interpreter(string statement)
 			}
 			else if (tempstring.substr(0, 2) == "42") {
 				// col "where"
-				size_t pos;
+				size_t pos = 0;
 				string attrName = tempstring.substr(2, pos - 2);
 				size_t nextPos = tempstring.find(",", pos + 1);
 				string tblName = tempstring.substr(pos + 1, nextPos - pos - 1);

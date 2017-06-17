@@ -112,8 +112,9 @@ void BufferManager::clear_file_buffer(const string file_name)
 const int BufferManager::file_block(string file_name)
 {
     FILE* fp = fopen(file_name.c_str(), "rb");
+    assert(fp);
     fseek(fp, 0, SEEK_END);
-    const int temp = ftell(fp);
+    const int temp = ftell(fp) / Block::BLOCK_SIZE + 1;
     return temp;
 }
 

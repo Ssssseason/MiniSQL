@@ -4,6 +4,7 @@
 #include <string>
 #include <fstream>
 #include <cstring>
+#include <cassert>
 using namespace std;
 
 class Block;
