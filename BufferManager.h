@@ -38,7 +38,10 @@ public:
     Block();
     ~Block();
     void set_dirty();
-    const int get_record_length();      // get the length of the record
+    char* get_record()
+    {
+        return record;
+    }
 private:
     char* record;
     int offset;
