@@ -144,11 +144,11 @@ vector<DataType> IndexManager::selectRecord(string db, string table, string attr
         else if(opcode.compare("<<")==0)
             return tree->select(key,LT);
         else if(opcode.compare("<=")==0)
-            return tree->select(key,EQ);
+            return tree->select(key,LE);
     }
 	else {
 		this->createIndex(db, table, attr, build(fileName),0);
-		this->print();
+		//this->print();
 		return this->selectRecord(db, table, attr, key, opcode);
 	}
 }

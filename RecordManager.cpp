@@ -290,8 +290,9 @@ vector<string> RecordManager::selectTuple_index(Table &table, condList &cList, v
 	Block* block = nullptr;
 	while(num_offset<offset.size())
 	{
-		if(num_offset==0||offset[num_offset]/4096!=offset[num_offset-1]/4096)
-			block=block_record.find_block((database_name+"\\"+table_name+".blo"),(offset[num_offset]/4096)*4096);
+		if (offset[num_offset] < 0)
+			num_offset++;
+		block=block_record.find_block((database_name+"\\"+table_name+".blo"),(offset[num_offset]/4096)*4096);
         char* record=block->get_record();
 		ifstream in;
 		int len,total_len,type,i=0,size=0,condition_judge=0;
@@ -465,8 +466,9 @@ vector<keyOffsetNode> RecordManager::deleteTuple_index(Table& table, condList &c
     Block *block = nullptr;
     while (num_offset<offset.size())
     {
-        if (num_offset == 0 || offset[num_offset] / 4096 != offset[num_offset - 1] / 4096)
-            block = block_record.find_block((database_name + "\\" + table_name + ".blo"), (offset[num_offset] / 4096) * 4096);
+		if (offset[num_offset] < 0)
+			num_offset++;
+        block = block_record.find_block((database_name + "\\" + table_name + ".blo"), (offset[num_offset] / 4096) * 4096);
         char* record = block->get_record();//block->record;
         ifstream in;
         int len, total_len, type, i = 0, size = 0, condition_judge = 0;
@@ -508,7 +510,7 @@ vector<keyOffsetNode> RecordManager::deleteTuple_index(Table& table, condList &c
                 nodes.push_back(node);
             }
             for (int i = 0; i<128; i++)
-                *(char*)(record_offset + i) = deletevalue;
+                *(char*)(record + offset[num_offset] % 4096 + i) = deletevalue;
         }
         value.clear();
         num_offset++;

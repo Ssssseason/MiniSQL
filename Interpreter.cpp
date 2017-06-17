@@ -1448,18 +1448,19 @@ string use_clause(string SQL, int start){
 }
 
 //处理一个句子
-string file_line(string s){
+string file_line(string s) {
 	int start = 0, end;
 	string temp;
-	if (s[s.length() - 1] == ';'){
+	if (s[s.length() - 1] == ';') {
 		s[s.length() - 1] = ' ';
 		s += ";";
 	}
-    transform(s.begin(), s.end(), s.begin(), ::tolower);
+	transform(s.begin(), s.end(), s.begin(), tolower);
 	while (s[start] == ' ')
 		start++;
 	end = s.find(' ', start);
 	temp = s.substr(start, end - start);
+	//	cout << temp << endl;
 	start = end + 1;
 	//若无输入，打印出错信息
 	if (temp.empty())
@@ -1489,50 +1490,63 @@ string file_line(string s){
 	else if (temp == "execfile")
 		s = execfile_clause(s, start);
 	//若为quit语句
-	else if (temp == "quit"){
+	else if (temp == "quit") {
 		s = quit_clause(s, start);
 		if (s == "90") online = 0;
 	}
 	//获取帮助
-	else if (temp == "help"){
+	else if (temp == "help") {
 		cout << "You can use those command:" << endl << "Create" << endl << "Use" << endl << "Select" << endl << "Drop" << endl << "Execfile" << endl << "Delete" << endl << "Quit" << endl;
 		s = "";
 	}
 	//若为非法语句
 	else
 	{
-		cout << "syntax error:" << " " << temp << "---is not a valid key word!" << endl;
+		cout << "syntax error:" << " " << temp << "1---is not a valid key word!" << endl;
 		s = "99";
 	}
 	return s;
 }
 
 //读取文件中的内容
-string execfile_file(string temp){
+string execfile_file(string temp) {
 	temp += ".sql";
+	int posi;
 	int count = 0;
-	string SQL, s;
+	string SQL, s, s2;
+	s = "";
 	ifstream infile;
 	infile.open(temp);
-	if (!infile){//若文件打开失败
+	if (!infile) {//若文件打开失败
 		cout << "Error in reading the file!" << endl;
 		SQL = "99";
 		return SQL;
 	}
-	else{//文件打开成功
-		while (getline(infile, s)){
-			s = file_line(s);
-			if (s == "99"){
+	else {//文件打开成功
+		while (getline(infile, s2)) {
+			if (s2.empty()) continue;
+			posi = s2.length() - 1;
+			while (s2[posi] == ' ') posi--;
+			if (s2[posi] == ';') {
+				s += s2;
+				s = file_line(s);
+			}
+			else {
+				s += s2;
+				continue;
+			}
+			if (s == "99") {
 				SQL = "99";
 				return SQL;
 			}
-			else{
-				if (count == 0){
+			else {
+				if (count == 0) {
 					SQL += s;
 				}
-				else SQL += "\n"+s;
+				else SQL += "\n" + s;
 				count++;
 			}
+			s = "";
 		}
 		SQL += "\n";
 		infile.close();
@@ -1540,7 +1554,7 @@ string execfile_file(string temp){
 	return SQL;
 }
 //验证execfile语句是否有效
-string execfile_clause(string SQL, int start){
+string execfile_clause(string SQL, int start) {
 	string temp;
 	int index, end;
 	while (SQL[start] == ' ')//找到第一个不是空格的位置
@@ -1549,7 +1563,7 @@ string execfile_clause(string SQL, int start){
 	end = SQL.find(' ', start);//搜索该位置后面第一个空格
 	temp = SQL.substr(start, end - start);//获取该单词
 	start = end + 1;//跳到下一个单词的位置
-	//若无，打印出错信息
+					//若无，打印出错信息
 	if (temp.empty())
 	{
 		cout << "error: file name has not been specified!" << endl;
@@ -1565,8 +1579,8 @@ string execfile_clause(string SQL, int start){
 			cout << "error:" << SQL.substr(index, SQL.length() - index - 2) << "---is not a valid file name!" << endl;
 			SQL = "99";
 		}
-		else{
-			if (execfile_file(temp) == "99"){
+		else {
+			if (execfile_file(temp) == "99") {
 				SQL = "99";
 				return SQL;
 			}
@@ -1576,6 +1590,7 @@ string execfile_clause(string SQL, int start){
 	}
 	return SQL;
 }
+
 
 //验证quit语句是否有效
 string quit_clause(string SQL, int start){
