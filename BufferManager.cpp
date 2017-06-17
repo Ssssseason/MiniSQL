@@ -76,17 +76,11 @@ void BufferManager::set_block_front(Block* moved_block)
 void BufferManager::write_to_file(Block* block_to_write)
 {
     block_to_write->is_pinned = false;
-    fstream out(block_to_write->file_name, ios::out | ios::binary);
-    out.seekp(block_to_write->offset, ios::beg);
-    for(int i = 0; i < 32; i++)
-    {
-        //if(block_to_write->record[i * 128] == 127 || block_to_write->record[i * 128] == 0)
-        //    continue;
-        //else
-            out.write(block_to_write->record + i * 128, 128);
-    }
+    FILE *fp = fopen(block_to_write->file_name.c_str(), "rb+");
+    fseek(fp, 0, SEEK_SET);
+    fwrite(record, Block::BLOCK_SIZE, 1, fp);
     block_to_write->is_dirty = false;
-    out.close();
+    fclose(fp);
     block_to_write->is_pinned = true;
 }
 
@@ -94,10 +88,10 @@ void BufferManager::write_to_file(Block* block_to_write)
 void BufferManager::read_to_block(const string file_name, const int offset, Block* block_to_read)
 {
     block_to_read->is_pinned = true;
-    fstream in(file_name, ios::in | ios::binary);
-    in.seekg(block_to_read->offset, ios::beg);
-    in.read(block_to_read->record, Block::BLOCK_SIZE);
-    in.close();
+    FILE* fp = fopen(file_name.c_str(), "rb");
+    fseek(fp, block_to_read->offset, SEEK_SET);
+    fread(record, Block::BLOCK_SIZE, 1, fp);
+    fclose();
     block_to_read->file_name = file_name;
     block_to_read->offset = offset;
     block_to_read->is_pinned = false;
@@ -117,11 +111,9 @@ void BufferManager::clear_file_buffer(const string file_name)
 
 const int BufferManager::file_block(string file_name)
 {
-    fstream in(file_name, ios::in | ios::binary);
-	int a = ios::end;
-	int b = ios::beg;
-    const int temp = (ios::end - ios::beg) / Block::BLOCK_SIZE + 1;
-    in.close();
+    FILE* fp = fopen(file_name.c_str(), "rb");
+    fseek(fp, 0, SEEK_END);
+    const int temp = ftell(fp);
     return temp;
 }
 
