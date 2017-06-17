@@ -16,26 +16,28 @@ bool RecordManager::judge_condition(string op, string value_judge, string value,
 		value_float = atof(value.c_str());
 		value_judge_float = atof(value_judge.c_str());
 	}
-	if (op == "<")
+	if (op == "<<")
 	{
 		if (type == 1 && value_int<value_judge_int) return true;
 		else if (type == 2 && value_float<value_judge_float) return true;
+		else if (type == 3 && value < value_judge) return true;
 		else return false;
 	}
-	else if (op == ">")
+	else if (op == ">>")
 	{
 		if (type == 1 && value_int>value_judge_int) return true;
 		else if (type == 2 && value_float>value_judge_float) return true;
+		else if (type == 3 && value > value_judge) return true;
 		else return false;
 	}
-	else if (op == "=")
+	else if (op == "==")
 	{
 		if (type == 1 && value_int == value_judge_int) return true;
 		else if (type == 2 && value_float == value_judge_float) return true;
 		else if (type == 3 && value == value_judge) return true;
 		else return false;
 	}
-	else if (op == "!=")
+	else if (op == "!="||op=="<>")
 	{
 		if (type == 1 && value_int != value_judge_int) return true;
 		else if (type == 2 && value_float != value_judge_float) return true;
@@ -46,12 +48,14 @@ bool RecordManager::judge_condition(string op, string value_judge, string value,
 	{
 		if (type == 1 && value_int <= value_judge_int) return true;
 		else if (type == 2 && value_float <= value_judge_float) return true;
+		else if (type == 3 && value <= value_judge) return true;
 		else return false;
 	}
 	else if (op == ">=")
 	{
 		if (type == 1 && value_int >= value_judge_int) return true;
 		else if (type == 2 && value_float >= value_judge_float) return true;
+		else if (type == 3 && value >= value_judge) return true;
 		else return false;
 	}
 
@@ -74,10 +78,10 @@ string RecordManager::memory_read(char*& block,int type,int len)//从内存中�
 //		string value_str(str,str+strlen(str)-1);
         return value_string;
 	}
-	else if(type==3)
+	else if(type==2)
 	{
 		value=*(float*)block;
-		block+=8;
+		block+=4;
 //		itoa(value,str,10);
 //		string value_str(str,str+strlen(str)-1);
 //		return value_str;
@@ -92,8 +96,17 @@ string RecordManager::memory_read(char*& block,int type,int len)//从内存中�
 	}
 	else
 	{
-		string value_str=*(char**)block;
+		char* value = new char[len];
+		memset(value, 0, len);
+		for (int k = 0; k < len; k++)
+		{
+			if ((*(block + k)) == 32)
+				break;
+			value[k] = (*(block + k));
+		}
 		block+=len;
+		string value_str(value);
+		delete value;
 		return value_str;
 	}
 }
@@ -114,10 +127,20 @@ int RecordManager::insert(Tuple&tuple)//插入到内存中，表名，数据库�
 	int i;
 	for(i=0;i<4096;)
 	{
-		if(*(char*)(record+i)==NULL)
+		int temp = 0;
+		for (size_t j = 0; j < 128; j++)
+		{
+			if (*(char*)(record + i + j) != NULL)
+			{
+				temp = 1;
+				break;
+			}
+		}
+		if (temp == 0)
 			break;
 		i+=128;
 	}
+	record += i;
 	ifstream in;
 	int total_len=0;
 	char name[20];
@@ -142,7 +165,8 @@ int RecordManager::insert(Tuple&tuple)//插入到内存中，表名，数据库�
 			char* value=new char[tuple.attrs[j].attr_len];
 			value_char= tuple.attr_values[j];
 			strcpy(value,value_char.c_str());
-			*(char**)record=value;
+			for (int k = 0; k < tuple.attrs[j].attr_len; k++)
+				*(char*)(record+k) = value[k];
 			record+=tuple.attrs[j].attr_len;
 			total_len += tuple.attrs[j].attr_len;
 		}
@@ -151,10 +175,27 @@ int RecordManager::insert(Tuple&tuple)//插入到内存中，表名，数据库�
 		*(char*)(record+j)=deletevalue;
 	block->set_dirty();
 	block_record.flush();
-	return (num-1)*4096+i;
+	return (num)*4096+i;
 }
-
-vector<string> RecordManager::selectTuple(Table &table, condList &cList)//无条件选择并且输出全部属性，数据库名，表名，
+int RecordManager::check(char* pos)
+{
+	for (int i = 0; i < 128; i++)
+	{
+		if ((*(char*)(pos + i)) != NULL)
+			return 0;
+	}
+	return 1;
+}
+int RecordManager::test(char* pos)
+{
+	for (int i = 0; i < 128; i++)
+	{
+		if ((*(char*)(pos + i)) != -1)
+			return 0;
+	}
+	return 1;
+}
+vector<string> RecordManager::selectTuple(Table &table, condList &cList)//无索引的条件查询
 {
 	string database_name= table.database_name,table_name= table.table_name;
 	vector<string> value;
@@ -175,8 +216,11 @@ vector<string> RecordManager::selectTuple(Table &table, condList &cList)//无条
 		char* record_attr;
 //		string attr_value;
 		int temp = 0;
-		while(size<4096||*(char*)record!=NULL)
+		while(size<4096&&!check(record+size))
 		{
+			while (test(record + size))
+				size += 128;
+			if (check(record + size)) break;
 			record_attr=record+size;
 			for(int j=0;j<table.attr_count;j++)
 			{
@@ -203,6 +247,7 @@ vector<string> RecordManager::selectTuple(Table &table, condList &cList)//无条
 				{
 					for(unsigned int j=0;j<out_value.size();j++)
 						value.push_back(out_value[j]);
+					out_value.clear();
 				}
 			}
 			size+=128;
@@ -219,7 +264,7 @@ vector<string> RecordManager::selectTuple_index(Table &table, condList &cList, v
 	unsigned int num_offset=0;
 	while(num_offset<offset.size())
 	{	
-		Block* block;
+		Block* block=nullptr;
 		if(num_offset==0||offset[num_offset]/4096!=offset[num_offset-1]/4096)
 			block=block_record.find_block((database_name+"\\"+table_name+".blo"),(offset[num_offset]/4096)*4096);
         char* record=block->get_record();
@@ -259,6 +304,7 @@ vector<string> RecordManager::selectTuple_index(Table &table, condList &cList, v
 			{
 				for(unsigned int j=0;j<out_value.size();j++)
 					value.push_back(out_value[j]);
+				out_value.clear();
 			}
 		}
 		num_offset++;	
@@ -282,7 +328,7 @@ vector<keyOffsetNode> RecordManager::selectTuple_createindex(Table& table,Index&
 		char name[20];
         //int size=0;
 		char* record_attr;
-		while(size<4096||*(char*)record!=NULL)
+		while(size<4096&&!check(record+size))
 		{
 			record_attr=record+size;
 			for(int j=0;j<table.attr_count;j++)
@@ -332,8 +378,11 @@ vector<keyOffsetNode> RecordManager::deleteTuple(Table& table, condList &cList, 
 		vector<string> value;
 		int temp = 0;
 		keyOffsetNode node;
-		while(size<4096||*(char*)record!=NULL)
+		while(size<4096&&!check(record+size))
 		{
+			while (test(record + size))
+				size += 128;
+			if (check(record + size)) break;
 			record_attr=record+size;
 			for(int j=0;j<table.attr_count;j++)
 			{
@@ -360,13 +409,17 @@ vector<keyOffsetNode> RecordManager::deleteTuple(Table& table, condList &cList, 
 					node.data=(i-1)*4096+size;
 					nodes.push_back(node);
 				}			
-				for(int j=0;j<128;j++)
-					*(char*)(record+size+j)=deletevalue;
+				for (int j = 0; j < 128; j++)
+				{
+					*(char*)(record + size + j) = deletevalue;
+				}
+				block->set_dirty();
 			}
 			value.clear();
 			size+=128;
 		}
 	}
+	block_record.flush();
 	return nodes;	
 }
 

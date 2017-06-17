@@ -78,6 +78,7 @@ void IndexManager::insertRecord(string db, string table, string attr, KeyType ke
         //修改索引文件
         //int num = bufferManager.file_block(fileName);
     }
+	this->print();
 }
 
 void IndexManager::deleteRecord(string db, string table, string attr, KeyType key){
@@ -96,6 +97,7 @@ vector<DataType> IndexManager::selectRecord(string db, string table, string attr
     string fileName = db +"/" + table + "_" + attr+".idx";
     map<string, BPlusTree*>::iterator iter;
     iter = indexMap.find(fileName);
+	this->print();
     if(iter!=indexMap.end()){
         //对于内存上的b+树修改
         BPlusTree* tree = indexMap[fileName];

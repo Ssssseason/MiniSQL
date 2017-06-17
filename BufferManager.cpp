@@ -120,7 +120,7 @@ const int BufferManager::file_block(string file_name)
     fstream in(file_name, ios::in | ios::binary);
 	int a = ios::end;
 	int b = ios::beg;
-    const int temp = (ios::end - ios::beg) / Block::BLOCK_SIZE;
+    const int temp = (ios::end - ios::beg) / Block::BLOCK_SIZE + 1;
     in.close();
     return temp;
 }

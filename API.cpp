@@ -32,7 +32,7 @@ void API::createTable(Table &table) {
 				// Create index in index manager.
 				// 数据库名，表名，属性名，属性id offset空
 				vector<KeyOffset> records;;
-				myIndex.createIndex(DBName, DBName, PKName, records);
+				myIndex.createIndex(DBName, table.table_name, PKName, records);
 			}
 		}
 		cout << "0 row(s) affected." << endl;
@@ -196,6 +196,7 @@ void API::selectTuple(string &tableName, string &attrName, condList &cList) {
 		ss << it->cmp_value;
 		ss >> cmp;
 		offset = myIndex.selectRecord(DBName, tableName, it->attr_name, cmp, it->op_type);
+		
 		for (; it != hasIndexList.end(); ++it) {
 			// int attrID = table.searchAttrId(it->attr_name);
 			// a = myIndex.selectRecord(DBName, tableName, it->attr_name, it->cmp_value, table.attr[attrID].attr_type, it->op_type);
@@ -386,9 +387,9 @@ void API::rearngValues(Tuple &tuple) {
 		if (tuple.attrs[i].attr_type == CHAR) {
 			attrValue = tuple.attr_values[i];
 			// Refill it with space.
-			while (attrValue.size() < tuple.attrs[i].attr_len) {
-				attrValue += " ";
-			}
+			//while (attrValue.size() < tuple.attrs[i].attr_len) {
+			//	attrValue += " ";
+			//}
 			// Cut if off.
 			tuple.attr_values[i] = attrValue.substr(0, tuple.attrs[i].attr_len);
 		}
@@ -406,9 +407,9 @@ void API::rearngValues(Table &table, condList &cList) {
 		if (table.attrs[id].attr_type == CHAR) {
 			cmpValue = it->cmp_value;
 			// Refill it with space.
-			while (cmpValue.size() < table.attrs[id].attr_len) {
-				cmpValue += " ";
-			}
+			//while (cmpValue.size() < table.attrs[id].attr_len) {
+			//	cmpValue += " ";
+			//}
 			// Cut it off.
 			it->cmp_value = cmpValue.substr(0, table.attrs[id].attr_len);
 		}

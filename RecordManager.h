@@ -7,7 +7,7 @@
 //#include "indexmanager.h"
 #include <vector>
 extern BufferManager block_record;
-const char deletevalue = 127;
+const char deletevalue = 255;
 class RecordManager {
 public:
 	bool judge_condition(string op, string value_judge, string value, int type);
@@ -19,6 +19,8 @@ public:
     bool delete_nocondition(Table& table);
 	vector<keyOffsetNode> deleteTuple(Table& table, condList &cList, vector<string> index_name);
     vector<keyOffsetNode> deleteTuple_index(Table& table, condList &cList, vector<DataType> offset, vector<string> index_name);
+	int RecordManager::check(char* pos);
+	int RecordManager::test(char* pos);
 };
 
 

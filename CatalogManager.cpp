@@ -27,7 +27,7 @@ bool CatalogManager::createtable(Table& table)
 	ofstream out;
 	ifstream in;
 	out.open(database_name + "\\" + database_name + "_tablelist.txt", ios::app);//将新表的名字写到对应的数据库信息中
-	out << table_name << endl;
+	out << table_name <<'\t'<< endl;
 	out.close();
 	//把新表写到新的文件里
 	out.open(database_name + "\\" + table_name + ".blo", ios::binary);//创建表的记录文件
@@ -213,7 +213,7 @@ bool CatalogManager::dropdatabase(string database_name)
 		out.close();
 		remove("Databaselist.txt");
 		rename("Databaselist_new.txt", "Databaselist.txt");
-		string cmd = "rmdir " + database_name;
+		string cmd = "rm " + database_name+" -rf";
 		if (system(cmd.c_str()) == -1) cout << "file delete error" << endl;
 	}
 	return true;
@@ -229,7 +229,12 @@ bool CatalogManager::judge_index_exist(Index &index)//再商量，需要一个dbname
 	while (!in.eof())
 	{
 		in >> name_index >> name_table >> name_attr;
-		if (name_index == index.index_name) return true;
+		if (name_attr == index.attr_name&&name_table == index.table_name)
+		{
+			return true;
+		}
+		else if (!index.index_name.empty() && index.index_name == name_index)
+			return true;
 	}
 	return false;
 }

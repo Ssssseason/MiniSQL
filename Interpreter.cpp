@@ -87,7 +87,7 @@ string get_attribute(string temp, string sql)
 	start = end + 1;
 	sql += T + " ";
 	//获得数据类型
-	while (((temp[start] == ' ')||(temp[start] == '\'')))//找到下一个单词的开头
+	while (temp[start] == ' ')//找到下一个单词的开头
 		start++;
 	end = temp.find(' ', start);
 	T = temp.substr(start, end - start);//属性类型
@@ -140,7 +140,7 @@ string get_attribute(string temp, string sql)
 		}
 	}
 	//是否有附加信息
-	while (start<temp.length() && ((temp[start] == ' ')||(temp[start] == '\'')))
+	while (start<temp.length() && (temp[start] == ' '))
 		start++;
 	if (start<temp.length())
 	{
@@ -656,17 +656,17 @@ string select_condition(string T) {
 	string temp1, temp2;
 	start = 0;
 	end = T.length() - 1;
-	while ((T[end] == ' ') || (T[end] == '\'')) end--;
+	while ((T[end] == ' ') || (T[end] == '\'') || (T[end] == '\"')) end--;
 
 	if ((index = T.find(">=")) != -1) {//如果有大于等于号
 		m1 = index - 1;
-		while (m1 >= start && ((T[m1] == ' ') || (T[m1] == '\''))) m1--;
+		while (m1 >= start && ((T[m1] == ' ') || (T[m1] == '\'')|| (T[m1] == '\"'))) m1--;
 		if (m1 < start) {
 			T = "99";
 			return T;
 		}
 		m2 = index + 2;
-		while (m2 <= end && ((T[m2] == ' ') || (T[m2] == '\''))) m2++;
+		while (m2 <= end && ((T[m2] == ' ') || (T[m2] == '\'') || (T[m2] == '\"'))) m2++;
 		if (m2 > end) {
 			T = "99";
 			return T;
@@ -683,13 +683,13 @@ string select_condition(string T) {
 
 	else if ((index = T.find("<=")) != -1) {
 		m1 = index - 1;
-		while (m1 >= start && ((T[m1] == ' ') || (T[m1] == '\''))) m1--;
+		while (m1 >= start && ((T[m1] == ' ') || (T[m1] == '\'') || (T[m1] == '\"'))) m1--;
 		if (m1 < start) {
 			T = "99";
 			return T;
 		}
 		m2 = index + 2;
-		while (m2 <= end && ((T[m2] == ' ') || (T[m2] == '\''))) m2++;
+		while (m2 <= end && ((T[m2] == ' ') || (T[m2] == '\'') || (T[m2] == '\"'))) m2++;
 		if (m2 > end) {
 			T = "99";
 			return T;
@@ -706,13 +706,13 @@ string select_condition(string T) {
 
 	else if ((index = T.find("<>")) != -1 || (index = T.find("!=")) != -1) {
 		m1 = index - 1;
-		while (m1 >= start && ((T[m1] == ' ') || (T[m1] == '\''))) m1--;
+		while (m1 >= start && ((T[m1] == ' ') || (T[m1] == '\'') || (T[m1] == '\"'))) m1--;
 		if (m1 < start) {
 			T = "99";
 			return T;
 		}
 		m2 = index + 2;
-		while (m2 <= end && ((T[m2] == ' ') || (T[m2] == '\''))) m2++;
+		while (m2 <= end && ((T[m2] == ' ') || (T[m2] == '\'') || (T[m2] == '\"'))) m2++;
 		if (m2 > end) {
 			T = "99";
 			return T;
@@ -729,13 +729,13 @@ string select_condition(string T) {
 
 	else if ((index = T.find(">")) != -1) {
 		m1 = index - 1;
-		while (m1 >= start && ((T[m1] == ' ') || (T[m1] == '\''))) m1--;
+		while (m1 >= start && ((T[m1] == ' ') || (T[m1] == '\'') || (T[m1] == '\"'))) m1--;
 		if (m1 < start) {
 			T = "99";
 			return T;
 		}
 		m2 = index + 1;
-		while (m2 <= end && ((T[m2] == ' ') || (T[m2] == '\''))) m2++;
+		while (m2 <= end && ((T[m2] == ' ') || (T[m2] == '\'') || (T[m2] == '\"'))) m2++;
 		if (m2 > end) {
 			T = "99";
 			return T;
@@ -752,13 +752,13 @@ string select_condition(string T) {
 
 	else if ((index = T.find("<")) != -1) {
 		m1 = index - 1;
-		while (m1 >= start && ((T[m1] == ' ') || (T[m1] == '\''))) m1--;
+		while (m1 >= start && ((T[m1] == ' ') || (T[m1] == '\'') || (T[m1] == '\"'))) m1--;
 		if (m1 < start) {
 			T = "99";
 			return T;
 		}
 		m2 = index + 1;
-		while (m2 <= end && ((T[m2] == ' ') || (T[m2] == '\''))) m2++;
+		while (m2 <= end && ((T[m2] == ' ') || (T[m2] == '\'') || (T[m2] == '\"'))) m2++;
 		if (m2 > end) {
 			T = "99";
 			return T;
@@ -775,13 +775,13 @@ string select_condition(string T) {
 
 	else if ((index = T.find("=")) != -1) {
 		m1 = index - 1;
-		while (m1 >= start && ((T[m1] == ' ') || (T[m1] == '\''))) m1--;
+		while (m1 >= start && ((T[m1] == ' ') || (T[m1] == '\'') || (T[m1] == '\"'))) m1--;
 		if (m1 < start) {
 			T = "99";
 			return T;
 		}
 		m2 = index + 1;
-		while (m2 <= end && ((T[m2] == ' ') || (T[m2] == '\''))) m2++;
+		while (m2 <= end && ((T[m2] == ' ') || (T[m2] == '\'') || (T[m2] == '\"'))) m2++;
 		if (m2 > end) {
 			T = "99";
 			return T;
@@ -963,15 +963,15 @@ string select_where(string temp , string sql){
 //			cout << "error:missing condition for select!" << endl;
 			return sql;
 		}
-		while (((temp[start] == ' ')||(temp[start] == '\''))&&start != temp.length() - 1){
+		while (((temp[start] == ' ')||(temp[start] == '\'') || (temp[start] == '\"'))&&start != temp.length() - 1){
 			start++;
 		}
-		if (((temp[start] == ' ')||(temp[start] == '\''))&&start == temp.length() - 1){//没有内容
+		if (((temp[start] == ' ')||(temp[start] == '\'') || (temp[start] == '\"'))&&start == temp.length() - 1){//没有内容
 			sql = "99";
 //			cout << "error:missing condition for select!" << endl;
 			return sql;
 		}
-		while (((temp[index] == ' ')||(temp[index] == '\''))&&index > 0){
+		while (((temp[index] == ' ')||(temp[index] == '\'') || (temp[index] == '\"'))&&index > 0){
 			index--;
 		}
 		if (index<=start){//没有内容
@@ -992,7 +992,7 @@ string select_where(string temp , string sql){
 	//获取最后一个条件
 	end = temp.length() - 2;
 	while (temp[end] == ' ') end--;
-	while (((temp[start] == ' ')||(temp[start] == '\''))) start++;
+	while (((temp[start] == ' ')||(temp[start] == '\'') || (temp[start] == '\"'))) start++;
 	if (end <= start){
 		sql = "99";
 //		cout << "error:missing condition for select!" << endl;
@@ -1020,9 +1020,9 @@ string get_line(string temp, string sql2){
 		T = temp.substr(start, end - start);//分解出一个单词
 		start = end + 1;
 		sql2 += T + " ";
-		while (start != temp.length() - 1 && ((temp[start] == ' ')||(temp[start] == '\'')))
+		while (start != temp.length() - 1 && ((temp[start] == ' ')||(temp[start] == '\'') || (temp[start] == '\"')))
 			start++;
-		if (start == temp.length() - 1 && ((temp[start] == ' ')||(temp[start] == '\''))){//如果在某个逗号后没有列名
+		if (start == temp.length() - 1 && ((temp[start] == ' ')||(temp[start] == '\'') || (temp[start] == '\"'))){//如果在某个逗号后没有列名
 			sql2 = "99";
 			cout << "syntax error: there is a missing line name!" << endl;
 			return sql2;
@@ -1220,16 +1220,16 @@ string get_insert(string temp, string sql){
 	start += 1;
 	while ((end = temp.find(',', start)) != -1){
 		index = end - 1;
-		while (((temp[start] == ' ')||(temp[start] == '\'')))
+		while (((temp[start] == ' ')||(temp[start] == '\'') || (temp[start] == '\"')))
 			start++;
-		while (((temp[index] == ' ')||(temp[index] == '\'')))
+		while (((temp[index] == ' ')||(temp[index] == '\'') || (temp[start] == '\"')))
 			index--;
 		T = temp.substr(start, index - start + 1);
 		sql += "," + T;
 		start = end + 1;
 	}
 	index = temp.length() - 1;
-	while (((temp[index] == ' ')||(temp[index] == '\'')))
+	while (((temp[index] == ' ')||(temp[index] == '\'') || (temp[index] == '\"')))
 		index--;
 	end = temp.find(')', start);
 	if (index != end){//最后一个字符不是)
@@ -1239,9 +1239,9 @@ string get_insert(string temp, string sql){
 	}
 	else{
 		index -= 1;
-		while (((temp[index] == ' ')||(temp[index] == '\'')))
+		while (((temp[index] == ' ')||(temp[index] == '\'') || (temp[index] == '\"')))
 			index--;
-		while (((temp[start] == ' ')||(temp[start] == '\'')))
+		while (((temp[start] == ' ')||(temp[start] == '\'') || (temp[start] == '\"')))
 			start++;
 		T = temp.substr(start, index - start + 1);
 		sql += "," + T;
