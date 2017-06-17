@@ -23,7 +23,7 @@ Table Transform::createTable(const string &SQL) {
 	string attrName;
 	string attrLen;
 	int unique;
-	int i, PKflag;
+	int i, PKflag = 0;
 	tbl.table_name = attrs[0];
 	for (i = 1; i < attrs.size(); i++) {
 		ss.clear();

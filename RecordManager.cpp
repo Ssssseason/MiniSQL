@@ -110,6 +110,7 @@ int RecordManager::insert(Tuple&tuple)//插入到内存中，表名，数据库�
 	}
 	block = block_record.find_block((database_name + "\\" + table_name + ".blo"), num * 4096);
     char* record=block->get_record();//block->record;
+	
 	int i;
 	for(i=0;i<4096;)
 	{
@@ -128,6 +129,7 @@ int RecordManager::insert(Tuple&tuple)//插入到内存中，表名，数据库�
 			*(int*)record=atoi(tuple.attr_values[j].c_str());
 			record+=4;
 			total_len+=4;
+			cout << *record;
 		}
 		else if(tuple.attrs[j].attr_type==2)
 		{
@@ -145,9 +147,10 @@ int RecordManager::insert(Tuple&tuple)//插入到内存中，表名，数据库�
 			total_len += tuple.attrs[j].attr_len;
 		}
 	}
-	for(int j=total_len;j<128;j++)
+	for(int j=0;j<128-total_len;j++)
 		*(char*)(record+j)=deletevalue;
 	block->set_dirty();
+	block_record.flush();
 	return (num-1)*4096+i;
 }
 

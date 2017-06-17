@@ -80,9 +80,9 @@ void BufferManager::write_to_file(Block* block_to_write)
     out.seekp(block_to_write->offset, ios::beg);
     for(int i = 0; i < 32; i++)
     {
-        if(block_to_write->record[i * 128] == 1)
-            continue;
-        else
+        //if(block_to_write->record[i * 128] == 127 || block_to_write->record[i * 128] == 0)
+        //    continue;
+        //else
             out.write(block_to_write->record + i * 128, 128);
     }
     block_to_write->is_dirty = false;

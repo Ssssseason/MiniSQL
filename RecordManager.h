@@ -7,7 +7,7 @@
 //#include "indexmanager.h"
 #include <vector>
 extern BufferManager block_record;
-const char deletevalue = 1;
+const char deletevalue = 127;
 class RecordManager {
 public:
 	bool judge_condition(string op, string value_judge, string value, int type);
