@@ -109,14 +109,15 @@ string RecordManager::memory_read(char*& block,int type,int len)//从内存中�
 		delete value;
 		return value_str;
 	}
-} 
+}
+
 vector<string> RecordManager::find_unique(Table& table,vector<int>& attr_id)//返回unique和primary的值的位置
 {
 	condList clist;
 	vector<string> value_return;//返回值
 	vector<string> value=selectTuple(table,clist);//select 的结果值
 	for(unsigned int i=0;i<table.attr_count;i++)
-		if(table.attrs[i].attr_key_type==UNIQUE||table.attrs[i].attr_key_type==UNIQUE)
+		if(table.attrs[i].attr_key_type==UNIQUE||table.attrs[i].attr_key_type==PRIMARY)
 			attr_id.push_back(table.attrs[i].attr_id);
 	for(unsigned int i=0;i<value.size();i+=table.attr_count)
 		for(unsigned int j=0;j<attr_id.size();j++)
@@ -125,14 +126,18 @@ vector<string> RecordManager::find_unique(Table& table,vector<int>& attr_id)//�
 }
 int RecordManager::insert(Tuple&tuple)//插入到内存中，表名，数据库名，
 {
+	string database_name, table_name;
 	database_name=tuple.database_name,table_name=tuple.table_name;
 	vector<int> attr_id;
-	vector<string> value=find_unique((Table*)tuple,attr_id);//找到那些有unique的值
+	vector<string> value=find_unique((Table)tuple,attr_id);//找到那些有unique的值
 	for(unsigned int j=0;j<value.size();j+=attr_id.size())
 		for(unsigned int k=0;k<attr_id.size();k++)
 			if(tuple.attr_values[k]==value[j+k])
 			{
-				cout<<"the "<<tuple.attrs[attr_id[k]].attr_name<<tuple.attr_values[k]<<"is duplicate"<<endl;
+				if (tuple.attrs[k].attr_key_type == PRIMARY)
+					cout << "duplicate entry " << tuple.attr_values[k] << "for key 'PRIMARY'" << endl;
+				else
+					cout << "duplicate entry " << tuple.attr_values[k] << "for key '" << tuple.attrs[k].attr_name<<"'"<<endl;
 				return -1;
 			}
 	int num=0;
@@ -183,6 +188,7 @@ int RecordManager::insert(Tuple&tuple)//插入到内存中，表名，数据库�
 		else
 		{
 			char* value=new char[tuple.attrs[j].attr_len];
+			memset(value, 0, tuple.attrs[j].attr_len);
 			value_char= tuple.attr_values[j];
 			strcpy(value,value_char.c_str());
 			for (int k = 0; k < tuple.attrs[j].attr_len; k++)
@@ -280,11 +286,10 @@ vector<string> RecordManager::selectTuple_index(Table &table, condList &cList, v
 {
 	string database_name= table.database_name,table_name= table.table_name;
 	vector<string> value;
-	block_record.file_block(database_name+"\\"+table_name+".blo");
 	unsigned int num_offset=0;
+	Block* block = nullptr;
 	while(num_offset<offset.size())
-	{	
-		Block* block=nullptr;
+	{
 		if(num_offset==0||offset[num_offset]/4096!=offset[num_offset-1]/4096)
 			block=block_record.find_block((database_name+"\\"+table_name+".blo"),(offset[num_offset]/4096)*4096);
         char* record=block->get_record();
@@ -299,6 +304,8 @@ vector<string> RecordManager::selectTuple_index(Table &table, condList &cList, v
 		if(cList.size()==0) condition_judge=0;
 		else condition_judge=1;
 		char* record_offset=record+offset[num_offset]%4096;
+		if (test(record_offset))
+			num_offset++;
 		for(int j=0;j<table.attr_count;j++)
 		{
 			temp=0;
@@ -350,6 +357,9 @@ vector<keyOffsetNode> RecordManager::selectTuple_createindex(Table& table,Index&
 		char* record_attr;
 		while(size<4096&&!check(record+size))
 		{
+			while (test(record + size))
+				size += 128;
+			if (check(record + size)) break;
 			record_attr=record+size;
 			for(int j=0;j<table.attr_count;j++)
 			{

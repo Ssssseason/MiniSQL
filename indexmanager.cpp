@@ -19,44 +19,58 @@ void IndexManager::print(){
     }
 }
 
-void IndexManager::createIndex(string db, string table, string attr, vector<KeyOffset> records){
+vector<KeyOffset> build(string fileName) {
+	vector<KeyOffset> v;
+	keyOffsetNode node;
+	for (int i = 0; i < block_record.file_block(fileName); i++) {
+		Block* block = block_record.find_block(fileName, Block::BLOCK_SIZE*(i));
+		char* record = block->get_record();
+		for (int offset = 0; offset < Block::BLOCK_SIZE && !check(record + offset); offset += (sizeof(KeyType) + sizeof(DataType))){
+			KeyType tmpk = *(KeyType*)(record + offset);
+			DataType tmpd = *(DataType*)(record + offset+sizeof(KeyType));
+			node.key = tmpk;
+			node.data = tmpd;
+			v.push_back(node);
+		}
+	}
+	return v;
+}
 
-    string fileName = db +"/" + table + "_" + attr+".idx";
+
+
+void IndexManager::createIndex(string db, string table, string attr, vector<KeyOffset> records, int tag){
+
+    string fileName = db +"\\" + table + "_" + attr+".idx";
 
     map<string, BPlusTree*>::iterator iter;
     iter = indexMap.find(fileName);
     //没有找到就加入
-    if(iter==indexMap.end()){
+	int file_num = block_record.file_block(fileName);
+	Block* block = block_record.find_block(fileName, Block::BLOCK_SIZE*(file_num-1));
+	char* record = block->get_record();
+	if(iter==indexMap.end()){
         BPlusTree* tree = new BPlusTree;
         for(vector<KeyOffset>::iterator iter=records.begin(); iter!=records.end();iter++){
             tree->insert(iter->key, iter->data);
+			
+			if (tag) {
+				int offset = iter - records.begin();
+				*(KeyType*)(record + offset*(sizeof(KeyType) + sizeof(DataType))) = iter->key;
+				*(DataType*)(record + offset*(sizeof(KeyType) + sizeof(DataType)) + sizeof(KeyType)) = iter->data;
+			}
         }
         //依次插入，然后记录表中
         indexMap[fileName] = tree;
+		if (tag) {
+			block->set_dirty();
+			block_record.flush();
+		}
     }
-    //遍历记录文件然后插入b+树种
-    /*
-    std::cout<<offset<<std::endl;
-
-    std::cout<<fileName<<std::endl;
-    int num = bufferManager.file_block(fileName);
-    qDebug()<<num;
-    for(int i=0; i<num; i++){
-        Block *b = bufferManager.find_block(fileName, i * 4096);
-        if(b == nullptr);
-            std::out<<"Error"<<std::endl;
-        else{
-            char* record = a->get_record();
-            std::out<<record<<std::endl;
-        }
-
-    }
-    */
 }
 
 //索引文件的删除由catalog实现，这里只删除内存上的树
 void IndexManager::dropIndex(string db, string table, string attr){
-    string fileName = db +"/" + table + "_" + attr+".idx";
+    string fileName = db +"\\" + table + "_" + attr+".idx";
     map<string, BPlusTree*>::iterator iter;
     iter = indexMap.find(fileName);
     if(iter!=indexMap.end()){
@@ -67,22 +81,43 @@ void IndexManager::dropIndex(string db, string table, string attr){
     }
 }
 
+bool check(char * p) {
+	for (int i = 0; i < sizeof(KeyType) + sizeof(DataType); i++)
+		if (p[i] != 0)
+			return false;
+	return true;
+}
+
 void IndexManager::insertRecord(string db, string table, string attr, KeyType key, DataType data){
-    string fileName = db +"/" + table + "_" + attr+".idx";
+    string fileName = db +"\\" + table + "_" + attr+".idx";
     map<string, BPlusTree*>::iterator iter;
     iter = indexMap.find(fileName);
+
+	int file_num = block_record.file_block(fileName);
+	Block* block = block_record.find_block(fileName, Block::BLOCK_SIZE*(file_num - 1));
+	char* record = block->get_record();
+	int recordoffset = 0;
+	while (!check(record + recordoffset))
+		recordoffset += sizeof(KeyType) + sizeof(DataType);
+
     if(iter!=indexMap.end()){
         //对于内存上的b+树修改
         BPlusTree* tree = indexMap[fileName];
         tree->insert(key, data);
+
+
+		int offset = recordoffset;
+		*(KeyType*)(record + offset) = key;
+		*(DataType*)(record + offset + sizeof(KeyType)) = data;
         //修改索引文件
         //int num = bufferManager.file_block(fileName);
+		block->set_dirty();
+		block_record.flush();
     }
-	this->print();
 }
 
 void IndexManager::deleteRecord(string db, string table, string attr, KeyType key){
-    string fileName = db +"/" + table + "_" + attr+".idx";
+    string fileName = db +"\\" + table + "_" + attr+".idx";
     map<string, BPlusTree*>::iterator iter;
     iter = indexMap.find(fileName);
     if(iter!=indexMap.end()){
@@ -94,10 +129,9 @@ void IndexManager::deleteRecord(string db, string table, string attr, KeyType ke
 }
 
 vector<DataType> IndexManager::selectRecord(string db, string table, string attr, int key, string opcode){
-    string fileName = db +"/" + table + "_" + attr+".idx";
+    string fileName = db +"\\" + table + "_" + attr+".idx";
     map<string, BPlusTree*>::iterator iter;
     iter = indexMap.find(fileName);
-	this->print();
     if(iter!=indexMap.end()){
         //对于内存上的b+树修改
         BPlusTree* tree = indexMap[fileName];
@@ -112,10 +146,15 @@ vector<DataType> IndexManager::selectRecord(string db, string table, string attr
         else if(opcode.compare("<=")==0)
             return tree->select(key,EQ);
     }
+	else {
+		this->createIndex(db, table, attr, build(fileName),0);
+		this->print();
+		return this->selectRecord(db, table, attr, key, opcode);
+	}
 }
 
 vector<DataType> IndexManager::selectBetweenRecord(string db, string table, string attr, KeyType low, KeyType high){
-    string fileName = db +"/" + table + "_" + attr+".idx";
+    string fileName = db +"\\" + table + "_" + attr+".idx";
     map<string, BPlusTree*>::iterator iter;
     iter = indexMap.find(fileName);
     if(iter!=indexMap.end()){
@@ -126,7 +165,7 @@ vector<DataType> IndexManager::selectBetweenRecord(string db, string table, stri
 }
 
 bool IndexManager::search(string db, string table, string attr, KeyType key){
-    string fileName = db +"/" + table + "_" + attr+".idx";
+    string fileName = db +"\\" + table + "_" + attr+".idx";
     map<string, BPlusTree*>::iterator iter;
     iter = indexMap.find(fileName);
     if(iter!=indexMap.end()){

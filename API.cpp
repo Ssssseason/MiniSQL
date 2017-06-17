@@ -32,7 +32,7 @@ void API::createTable(Table &table) {
 				// Create index in index manager.
 				// 数据库名，表名，属性名，属性id offset空
 				vector<KeyOffset> records;;
-				myIndex.createIndex(DBName, table.table_name, PKName, records);
+				myIndex.createIndex(DBName, table.table_name, PKName, records, 1);
 			}
 		}
 		cout << "0 row(s) affected." << endl;
@@ -68,13 +68,19 @@ void API::dropTable(string &tableName) {
 }
 
 void API::createIndex(Index &index) {
-	index.database_name == DBName;
-	if (myCatalog.createindex(index)) {//index name , database name ,attrname, table name
-		Table table = myCatalog.Read_Table_Info(DBName, index.table_name);
-		vector<KeyOffset> records;
-		records = myRecord.selectTuple_createindex(table, index);
-		myIndex.createIndex(DBName, DBName, index.attr_name, records);
-		cout << "0 row(s) affected." << endl;
+	Table table = myCatalog.Read_Table_Info(DBName, index.table_name);
+	index.database_name = DBName;
+	int attrID = table.searchAttrId(index.attr_name);
+	if (table.attrs[attrID].attr_key_type == UNIQUE || table.attrs[attrID].attr_key_type == PRIMARY) {
+		if (table.attrs[attrID].attr_type != CHAR) {
+			if (myCatalog.createindex(index)) {//index name , database name ,attrname, table name
+				Table table = myCatalog.Read_Table_Info(DBName, index.table_name);
+				vector<KeyOffset> records;
+				records = myRecord.selectTuple_createindex(table, index);
+				myIndex.createIndex(DBName, index.table_name, index.attr_name, records,1);
+				cout << "0 row(s) affected." << endl;
+			}
+		}
 	}
 }
 
@@ -131,8 +137,14 @@ void API::insertTuple(Tuple &tuple) {
 			ss << tuple.attr_values[i];
 			ss >> key;
 			if(myIndex.search(DBName, tuple.table_name, index.attr_name, key)){
-				cout << "Error: Duplicate entry '" << tuple.attr_values[i] << "' for key 'PRIMARY'." << endl;
-				return;
+				if (tuple.attrs[i].attr_key_type == UNIQUE) {
+					cout << "Error: Duplicate entry '" << tuple.attr_values[i] << "' for key '" << index.attr_name << "'." << endl;
+					return;
+				}
+				else if (tuple.attrs[i].attr_key_type == PRIMARY) {
+					cout << "Error: Duplicate entry '" << tuple.attr_values[i] << "' for key 'PRIMARY'." << endl;
+					return;
+				}
 			}
 		}
 	}
@@ -170,6 +182,7 @@ void API::selectTuple(string &tableName, string &attrName, condList &cList) {
 	Index index;
 	index.database_name = DBName;
 	index.table_name = tableName;
+	int flag = 0;
 	
 	for (it = cList.begin(); it != cList.end(); ++it) {
 		// Check index in catalog manager.
@@ -195,41 +208,51 @@ void API::selectTuple(string &tableName, string &attrName, condList &cList) {
 		stringstream ss;
 		ss << it->cmp_value;
 		ss >> cmp;
-		offset = myIndex.selectRecord(DBName, tableName, it->attr_name, cmp, it->op_type);
-		
-		for (; it != hasIndexList.end(); ++it) {
-			// int attrID = table.searchAttrId(it->attr_name);
-			// a = myIndex.selectRecord(DBName, tableName, it->attr_name, it->cmp_value, table.attr[attrID].attr_type, it->op_type);
-			ss.clear();
-			ss << it->cmp_value;
-			ss >> cmp;
-			a = myIndex.selectRecord(DBName, tableName, it->attr_name, cmp, it->op_type);
-			b = offset;
-			// Intersect offsets by ascending order.
-			sort(a.begin(), a.end());
-			sort(b.begin(), b.end());
-			offset.resize(a.size() + b.size());
-			offIt = set_intersection(a.begin(), a.end(), b.begin(), b.end(), offset.begin());
-			offset.erase(offIt, offset.end());
-			offIt = unique(offset.begin(), offset.end());
-			offset.erase(offIt, offset.end());
-		}
+		if (it->op_type != "<>" && it->op_type != "!=") {
 
-		// No tuples match condition in hasIndexList.
-		if (offset.empty()) {
-			cout << "o row(s) returned." << endl;
-			return;
+			offset = myIndex.selectRecord(DBName, tableName, it->attr_name, cmp, it->op_type);
+			for (; it != hasIndexList.end(); ++it) {
+				// int attrID = table.searchAttrId(it->attr_name);
+				// a = myIndex.selectRecord(DBName, tableName, it->attr_name, it->cmp_value, table.attr[attrID].attr_type, it->op_type);
+				ss.clear();
+				ss << it->cmp_value;
+				ss >> cmp;
+				a = myIndex.selectRecord(DBName, tableName, it->attr_name, cmp, it->op_type);
+				b = offset;
+				// Intersect offsets by ascending order.
+				sort(a.begin(), a.end());
+				sort(b.begin(), b.end());
+				offset.resize(a.size() + b.size());
+				offIt = set_intersection(a.begin(), a.end(), b.begin(), b.end(), offset.begin());
+				offset.erase(offIt, offset.end());
+				offIt = unique(offset.begin(), offset.end());
+				offset.erase(offIt, offset.end());
+			}
+
+			// No tuples match condition in hasIndexList.
+			if (offset.empty()) {
+				cout << "o row(s) returned." << endl;
+				return;
+			}
+		}
+		else {
+			flag = 1;
 		}
 	}
 	// Select tuples in record manager, with offset to speed up.
 	vector<string>select_values;
 
 	// Call record manager.
-	if(offset.empty()){
-		select_values = myRecord.selectTuple(table, noIndexList);
+	if (flag) {
+		select_values = myRecord.selectTuple(table, cList);
 	}
 	else {
-		select_values = myRecord.selectTuple_index(table, noIndexList, offset);
+		if(offset.empty()){
+			select_values = myRecord.selectTuple(table, noIndexList);
+		}
+		else {
+			select_values = myRecord.selectTuple_index(table, noIndexList, offset);
+		}
 	}
 
 	if (!select_values.empty()) {
@@ -253,13 +276,18 @@ void API::deleteTuple(string &tableName, condList &cList) {
 	index.database_name = DBName;
 	index.table_name = tableName;
 	vector<string> attrNames;
+	for (int i = 0; i < table.attr_count; i++) {
+		index.attr_name = table.attrs[i].attr_name;
+		if (myCatalog.judge_index_exist(index)) {
+			attrNames.push_back(table.attrs[i].attr_name);
+		}
+	}
 	
 	for (it = cList.begin(); it != cList.end(); ++it) {
 		// Check index in catalog manager.
 		index.attr_name = it->attr_name;
 		if(myCatalog.judge_index_exist(index)){
 			hasIndexList.push_back(*it);
-			attrNames.push_back(it->attr_name);
 		}
 		else{
 			noIndexList.push_back(*it);
@@ -304,13 +332,11 @@ void API::deleteTuple(string &tableName, condList &cList) {
 			return;
 		}
 	}
-
+	
 	vector<KeyOffset> records;
 	// Call record manager to delete tuples.
 	if(offset.empty()){
-        //?
-        vector<string> index_name;
-        records = myRecord.deleteTuple(table, noIndexList,index_name);
+        records = myRecord.deleteTuple(table, noIndexList, attrNames);
 	}
 	else {
 		records = myRecord.deleteTuple_index(table, noIndexList, offset, attrNames);
@@ -419,8 +445,12 @@ void API::rearngValues(Table &table, condList &cList) {
 void API::drawResult(const Table &table, vector<string>select_value) {
 	vector<string>::iterator it;
 	int cnt = 0;
+	for (int i = 0; i < table.attr_count; i++) {
+		cout << table.attrs[i].attr_name << ",\t";
+	}
+	cout << endl;
 	for(it = select_value.begin(); it != select_value.end(); ++it){
-		cout << *it << " ";
+		cout << *it << ",\t";
 		cnt++;
 		if(cnt == table.attr_count){
 			cout << endl;

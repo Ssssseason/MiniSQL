@@ -27,7 +27,7 @@ bool CatalogManager::createtable(Table& table)
 	ofstream out;
 	ifstream in;
 	out.open(database_name + "\\" + database_name + "_tablelist.txt", ios::app);//将新表的名字写到对应的数据库信息中
-	out << table_name <<'\t'<< endl;
+	out << table_name << endl;
 	out.close();
 	//把新表写到新的文件里
 	out.open(database_name + "\\" + table_name + ".blo", ios::binary);//创建表的记录文件

@@ -15,7 +15,11 @@ struct keyOffsetNode{
     DataType data;
 };
 */
+bool check(char* p);
+
+
 typedef keyOffsetNode KeyOffset;
+extern BufferManager block_record;
 
 class IndexManager{
 public:
@@ -23,7 +27,7 @@ public:
     ~IndexManager();
 
     //创建索引
-    void createIndex(string db, string table, string attr, vector<KeyOffset> records);
+    void createIndex(string db, string table, string attr, vector<KeyOffset> records, int tag);
     //内存上删除索引
     void dropIndex(string db, string table, string attr);
     //内存上插入记录，同时修改索引文件

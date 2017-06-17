@@ -1509,7 +1509,7 @@ string file_line(string s){
 
 //读取文件中的内容
 string execfile_file(string temp){
-	temp += ".txt";
+	temp += ".sql";
 	int count = 0;
 	string SQL, s;
 	ifstream infile;
