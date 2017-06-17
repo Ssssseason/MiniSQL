@@ -4,6 +4,7 @@
 #include <string>
 #include <fstream>
 #include <cstring>
+#include <cassert>
 using namespace std;
 
 class Block;
@@ -38,7 +39,6 @@ public:
     Block();
     ~Block();
     void set_dirty();
-    const int get_record_length();      // get the length of the record
     char* get_record()
     {
         return record;

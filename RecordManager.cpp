@@ -452,7 +452,7 @@ vector<keyOffsetNode> RecordManager::deleteTuple_index(Table& table, condList &c
     vector<keyOffsetNode> nodes;
     block_record.file_block(database_name + "\\" + table_name + ".blo");
     unsigned int num_offset = 0;
-    Block *block;
+    Block *block = nullptr;
     while (num_offset<offset.size())
     {
         if (num_offset == 0 || offset[num_offset] / 4096 != offset[num_offset - 1] / 4096)

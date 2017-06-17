@@ -1,0 +1,1 @@
+t1_id_autoindex	t1	id
