@@ -78,7 +78,7 @@ void BufferManager::write_to_file(Block* block_to_write)
     block_to_write->is_pinned = false;
     FILE *fp = fopen(block_to_write->file_name.c_str(), "rb+");
     fseek(fp, 0, SEEK_SET);
-    fwrite(record, Block::BLOCK_SIZE, 1, fp);
+    fwrite(block_to_write->record, Block::BLOCK_SIZE, 1, fp);
     block_to_write->is_dirty = false;
     fclose(fp);
     block_to_write->is_pinned = true;
@@ -90,8 +90,8 @@ void BufferManager::read_to_block(const string file_name, const int offset, Bloc
     block_to_read->is_pinned = true;
     FILE* fp = fopen(file_name.c_str(), "rb");
     fseek(fp, block_to_read->offset, SEEK_SET);
-    fread(record, Block::BLOCK_SIZE, 1, fp);
-    fclose();
+    fread(block_to_read->record, Block::BLOCK_SIZE, 1, fp);
+    fclose(fp);
     block_to_read->file_name = file_name;
     block_to_read->offset = offset;
     block_to_read->is_pinned = false;
@@ -125,14 +125,6 @@ Block::Block():
     is_pinned(false)
 {
     memset(record, 0, BLOCK_SIZE);
-}
-
-const int Block::get_record_length()
-{
-    for(int i = 0; i < BLOCK_SIZE; ++i)
-        if(record[i] == 1)
-            return i + 1;
-    return BLOCK_SIZE;
 }
 
 Block::~Block()
