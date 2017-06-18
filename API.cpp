@@ -53,7 +53,8 @@ void API::dropTable(string &tableName) {
 			index.attr_name = table.attrs[i].attr_name;
 			if(myCatalog.judge_index_exist(index)){
 				// 删除index中对应index
-				//数据库名，表名，属性名
+				//数据库名，表名，属性名d4
+				myCatalog.dropindex(index);
 				myIndex.dropIndex(DBName, tableName, table.attrs[i].attr_name);
 			}
 		}
@@ -81,18 +82,37 @@ void API::createIndex(Index &index) {
 				cout << "0 row(s) affected." << endl;
 			}
 		}
+		else {
+			//if(myCatalog.createindex(index))
+			cout << "0 row(s) affected." << endl;
+		}
+	}
+	else {
+		cout << "Error: invalid key type." << endl;
 	}
 }
 
 void API::dropIndex(string &indexName) {
 	Index index = myCatalog.Read_Index_Info(DBName, indexName);
 	// 同create index
-	// index name , database name ,attrname, table name
-	// Delete index info in catalog manager.
-	if (myCatalog.dropindex(index)) {
-		// Delete index info in index manager.
-		// 数据库名，表名，属性名
-		myIndex.dropIndex(DBName, index.table_name, index.attr_name);
+
+	if (!index.index_name.empty()) {
+		Table table = myCatalog.Read_Table_Info(DBName, index.table_name);
+		int attrID = table.searchAttrId(index.attr_name);
+		if (table.attrs[attrID].attr_key_type == INT || table.attrs[attrID].attr_key_type == FLOAT) {
+			if (myCatalog.dropindex(index)) {
+				// Delete index info in index manager.
+				// 数据库名，表名，属性名
+				myIndex.dropIndex(DBName, index.table_name, index.attr_name);
+				cout << "0 row(s) affected." << endl;
+			}
+		}
+		else {
+			//myCatalog.dropindex(index);
+			cout << "0 row(s) affected." << endl;
+		}
+	}
+	else {
 		cout << "0 row(s) affected." << endl;
 	}
 }
@@ -121,13 +141,7 @@ void API::insertTuple(Tuple &tuple) {
 	index.database_name = DBName;
 	index.table_name = tuple.table_name;
 
-	// Check wether there exits duplicate for PK or unique key through catalog manager.
-	// string indexName;
-
-	// 在index中，数据库名 表名 属性名 属性值 偏移量
-
-	// 增加数据库名字，表名，values
-	// vector<string> 
+	// Check wether there exits duplicate for PK or unique key through index manager.
 	stringstream ss;
 	float key;
 	for (int i = 0; i < tuple.attr_count; i++) {
@@ -151,12 +165,7 @@ void API::insertTuple(Tuple &tuple) {
 
 	// Insert tuple through record manager.
     DataType offset = myRecord.insert(tuple);//Insert(tuple);
-	// if (offset == -1) {
-	// 	cout << "Error: Duplicate entry '0' for key 'PRIMARY'";
-	// }
-	// else {
-//		stringstream ss;
-//		float key;
+	if (offset != -1) {
 		for (int i = 0; i < tuple.attr_count; i++) {
 			// Check index through index manager.
 			index.attr_name = tuple.attrs[i].attr_name;
@@ -168,11 +177,15 @@ void API::insertTuple(Tuple &tuple) {
 			}
 		}
 		cout << "1 row(s) affected." << endl;
-	// }
+	}
 }
 
 void API::selectTuple(string &tableName, string &attrName, condList &cList) {
 	Table table = myCatalog.Read_Table_Info(DBName, tableName);
+	if (table.attr_count == 0) {
+		cout << "Error: Table '" << tableName << "' doesn't exist." << endl;
+		return;
+	}
 	// Rearrange CHAR type attribute in order to compare.
 	rearngValues(table, cList);
 
@@ -201,19 +214,14 @@ void API::selectTuple(string &tableName, string &attrName, condList &cList) {
 	if (!hasIndexList.empty()) {
 		it = hasIndexList.begin();
 		// search index in index manager
-		// 没有between
-		// int attrID = table.searchAttrId(it->attr_name);
-		// offset = myIndex.selectRecord(DBName, tableName, it->attr_name, it->cmp_value, table.attr[attrID].attr_type, it->op_type);
 		float cmp;
 		stringstream ss;
 		ss << it->cmp_value;
 		ss >> cmp;
 		if (it->op_type != "<>" && it->op_type != "!=") {
-
 			offset = myIndex.selectRecord(DBName, tableName, it->attr_name, cmp, it->op_type);
 			for (; it != hasIndexList.end(); ++it) {
 				// int attrID = table.searchAttrId(it->attr_name);
-				// a = myIndex.selectRecord(DBName, tableName, it->attr_name, it->cmp_value, table.attr[attrID].attr_type, it->op_type);
 				ss.clear();
 				ss << it->cmp_value;
 				ss >> cmp;
@@ -301,16 +309,12 @@ void API::deleteTuple(string &tableName, condList &cList) {
 		// search index in index manager
 		// 没有between
 
-		// int attrID = table.searchAttrId(it->attr_name);
-		// offset = myIndex.selectRecord(DBName, tableName, it->attr_name, it->cmp_value, table.attr[attrID].attr_type, it->op_type);
 		float cmp;
 		stringstream ss;
 		ss << it->cmp_value;
 		ss >> cmp;
 		offset = myIndex.selectRecord(DBName, tableName, it->attr_name, cmp, it->op_type);
 		for (; it != hasIndexList.end(); ++it) {
-			// int attrID = table.searchAttrId(it->attr_name);
-			// a = myIndex.selectRecord(DBName, tableName, it->attr_name, it->cmp_value, table.attr[attrID].attr_type, it->op_type);
 			ss.clear();
 			ss << it->cmp_value;
 			ss >> cmp;
@@ -412,11 +416,6 @@ void API::rearngValues(Tuple &tuple) {
 		// Rearrange CHAR type attribute only.
 		if (tuple.attrs[i].attr_type == CHAR) {
 			attrValue = tuple.attr_values[i];
-			// Refill it with space.
-			//while (attrValue.size() < tuple.attrs[i].attr_len) {
-			//	attrValue += " ";
-			//}
-			// Cut if off.
 			tuple.attr_values[i] = attrValue.substr(0, tuple.attrs[i].attr_len);
 		}
 	}
@@ -432,11 +431,6 @@ void API::rearngValues(Table &table, condList &cList) {
 		// Rearrange CHAR type attribute only.
 		if (table.attrs[id].attr_type == CHAR) {
 			cmpValue = it->cmp_value;
-			// Refill it with space.
-			//while (cmpValue.size() < table.attrs[id].attr_len) {
-			//	cmpValue += " ";
-			//}
-			// Cut it off.
 			it->cmp_value = cmpValue.substr(0, table.attrs[id].attr_len);
 		}
 	}
@@ -445,18 +439,20 @@ void API::rearngValues(Table &table, condList &cList) {
 void API::drawResult(const Table &table, vector<string>select_value) {
 	vector<string>::iterator it;
 	int cnt = 0;
+	cout << endl << "\t\t";
 	for (int i = 0; i < table.attr_count; i++) {
-		cout << table.attrs[i].attr_name << ",\t";
+		cout << table.attrs[i].attr_name << "\t";
 	}
-	cout << endl;
+	cout << endl << endl << "\t\t";
 	for(it = select_value.begin(); it != select_value.end(); ++it){
-		cout << *it << ",\t";
+		cout << *it << "\t";
 		cnt++;
 		if(cnt == table.attr_count){
-			cout << endl;
+			cout << endl << "\t\t";
 			cnt = 0;
 		}
 	}
+	cout << endl;
 
 	// int colWidth[32] = { 0 };
 	// // Ajust column length based on length of each value.

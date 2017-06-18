@@ -32,7 +32,7 @@ string read_input()
 		}
 	}
 	//将输入大写转化为小写
-    transform(SQL.begin(), SQL.end(), SQL.begin(), ::tolower);
+    //transform(SQL.begin(), SQL.end(), SQL.begin(), ::tolower);
 	//返回用户输入
 	return SQL;
 }
@@ -804,152 +804,6 @@ string select_condition(string T) {
 }
 
 
-
-//
-//string select_condition(string T){
-//	int start, index, end, m1, m2;
-//	string temp1, temp2;
-//	start = 0;
-//	end = T.length() - 1;
-//	while ((T[end] == ' ') || (T[end] == '\'')) end--;
-//	if ((index=T.find(">=")) != -1){//如果有大于等于号
-//		m1 = index - 1;
-//		while (m1 >= start&&((T[m1] == ' ')||(T[m1]=='\''))) m1--;
-//		if (m1 < start){
-//			T = "99";
-//			return T;
-//		}
-//		m2 = index + 2;
-//		while (m2 <= end&&((T[m2] == ' ')||(T[m2]=='\''))) m2++;
-//		if (m2 > end){
-//			T = "99";
-//			return T;
-//		}
-//		temp1 = T.substr(start, m1 - start + 1);
-//		temp2 = T.substr(m2, end - m2 + 1);
-//		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)){
-//			T = "99";
-//			return T;
-//		}
-//		else
-//			T = temp1 + " >= " + temp2;
-//	}
-//	else if ((index = T.find("<=")) != -1){
-//		m1 = index - 1;
-//		while (m1 >= start&&((T[m1] == ' ')||(T[m1]=='\''))) m1--;
-//		if (m1 < start){
-//			T = "99";
-//			return T;
-//		}
-//		m2 = index + 2;
-//		while (m2 <= end&&((T[m2] == ' ')||(T[m2]=='\''))) m2++;
-//		if (m2 > end){
-//			T = "99";
-//			return T;
-//		}
-//		temp1 = T.substr(start, m1 - start + 1);
-//		temp2 = T.substr(m2, end - m2 + 1);
-//		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)){
-//			T = "99";
-//			return T;
-//		}
-//		else
-//			T = temp1 + " <= " + temp2;
-//	}
-//	else if ((index = T.find(">")) != -1){
-//		m1 = index - 1;
-//		while (m1 >= start&&((T[m1] == ' ')||(T[m1]=='\''))) m1--;
-//		if (m1 < start){
-//			T = "99";
-//			return T;
-//		}
-//		m2 = index + 1;
-//		while (m2 <= end&&((T[m2] == ' ')||(T[m2]=='\''))) m2++;
-//		if (m2 > end){
-//			T = "99";
-//			return T;
-//		}
-//		temp1 = T.substr(start, m1 - start + 1);
-//		temp2 = T.substr(m2, end - m2 + 1);
-//		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)){
-//			T = "99";
-//			return T;
-//		}
-//		else
-//			T = temp1 + " >> " + temp2;
-//	}
-//	else if ((index = T.find("<")) != -1){
-//		m1 = index - 1;
-//		while (m1 >= start&&((T[m1] == ' ')||(T[m1]=='\''))) m1--;
-//		if (m1 < start){
-//			T = "99";
-//			return T;
-//		}
-//		m2 = index + 1;
-//		while (m2 <= end&&((T[m2] == ' ')||(T[m2]=='\''))) m2++;
-//		if (m2 > end){
-//			T = "99";
-//			return T;
-//		}
-//		temp1 = T.substr(start, m1 - start + 1);
-//		temp2 = T.substr(m2, end - m2 + 1);
-//		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)){
-//			T = "99";
-//			return T;
-//		}
-//		else
-//			T = temp1 + " << " + temp2;
-//	}
-//	else if ((index = T.find("<>")) != -1 || (index = T.find("!="))){
-//		m1 = index - 1;
-//		while (m1 >= start&&((T[m1] == ' ')||(T[m1]=='\''))) m1--;
-//		if (m1 < start){
-//			T = "99";
-//			return T;
-//		}
-//		m2 = index + 2;
-//		while (m2 <= end&&((T[m2] == ' ')||(T[m2]=='\''))) m2++;
-//		if (m2 > end){
-//			T = "99";
-//			return T;
-//		}
-//		temp1 = T.substr(start, m1 - start + 1);
-//		temp2 = T.substr(m2, end - m2 + 1);
-//		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)){
-//			T = "99";
-//			return T;
-//		}
-//		else
-//			T = temp1 + " <> " + temp2;
-//	}
-//	else if ((index = T.find("=")) != -1){
-//		m1 = index - 1;
-//		while (m1 >= start&&((T[m1] == ' ')||(T[m1]=='\''))) m1--;
-//		if (m1 < start){
-//			T = "99";
-//			return T;
-//		}
-//		m2 = index + 1;
-//		while (m2 <= end&&((T[m2] == ' ')||(T[m2]=='\''))) m2++;
-//		if (m2 > end){
-//			T = "99";
-//			return T;
-//		}
-//		temp1 = T.substr(start, m1 - start + 1);
-//		temp2 = T.substr(m2, end - m2 + 1);
-//		if ((temp1.find(' ') != -1) || (temp2.find(' ') != -1)){
-//			T = "99";
-//			return T;
-//		}
-//		else
-//			T = temp1 + " == " + temp2;
-//	}
-//	else{
-//		T = "99";
-//	}
-//	return T;
-//}
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 //验证select_where语句是否有效
 string select_where(string temp , string sql){
@@ -1455,7 +1309,7 @@ string file_line(string s) {
 		s[s.length() - 1] = ' ';
 		s += ";";
 	}
-	transform(s.begin(), s.end(), s.begin(), tolower);
+	//transform(s.begin(), s.end(), s.begin(), tolower);
 	while (s[start] == ' ')
 		start++;
 	end = s.find(' ', start);
@@ -1756,7 +1610,7 @@ string Interpreter(string statement)
 		string tempstring;
 		while ((tempend = SQL.find('\n', tempstart)) != -1){
 			tempstring = SQL.substr(tempstart, tempend - tempstart);
-			cout << tempstring<<endl;
+			//cout << tempstring<<endl;
 			tempstart = tempend + 1;
 			if (tempstring.substr(0, 2) == "00"){
 				// create database

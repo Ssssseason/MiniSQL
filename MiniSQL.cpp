@@ -28,7 +28,7 @@ int main()
 //		SQL = read_input();
 		SQL = Interpreter(SQL);
 //		API_Module(SQL);
-		cout << SQL << endl;
+//		cout << SQL << endl;
 	}
     cout << "\t\t              谢谢使用，再见！ " << endl;
 }
