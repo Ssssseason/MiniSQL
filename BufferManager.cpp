@@ -116,6 +116,7 @@ const int BufferManager::file_block(string file_name)
     fseek(fp, 0, SEEK_END);
 	//int temp1 = ftell(fp);
     const int temp = ftell(fp) / Block::BLOCK_SIZE;
+	fclose(fp);
     return temp;
 }
 

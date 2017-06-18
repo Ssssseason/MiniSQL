@@ -121,8 +121,9 @@ bool CatalogManager::droptable(Table& table)
 		out.open(database_name + "\\" + database_name + "_numtable.txt", ios::out);
 		out << num_table << "\t";
 		out.close();
-		remove((database_name + "\\" + table_name + ".blo").c_str());
-		remove((database_name+"\\"+table_name+"_table_info.cat").c_str());//删除所有索引信息文件
+		string a = database_name + "\\" + table_name + ".blo";
+		int b = remove((database_name + "\\" + table_name + ".blo").c_str());
+		int c = remove((database_name+"\\"+table_name+"_table_info.cat").c_str());//删除所有索引信息文件
 		remove((database_name + "\\" + database_name + "_tablelist.txt").c_str());
 		rename((database_name + "\\" + database_name + "_tablelist_new.txt").c_str(), (database_name + "\\" + database_name + "_tablelist.txt").c_str());
 		//remove((database_name + "\\" + table_name + "_index_info.idx").c_str());
