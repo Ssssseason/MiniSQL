@@ -25,10 +25,7 @@ int main()
 	{
 		cout << "MiniSQL-->> ";
 		SQL="";//清空SQL语句
-//		SQL = read_input();
 		SQL = Interpreter(SQL);
-//		API_Module(SQL);
-//		cout << SQL << endl;
 	}
     cout << "\t\t              谢谢使用，再见！ " << endl;
 }

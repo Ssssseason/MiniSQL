@@ -485,13 +485,13 @@ vector<keyOffsetNode> RecordManager::deleteTuple_index(Table& table, condList &c
         {
             temp = 0;
             attr_value = memory_read(record_offset, table.attrs[j].attr_type, table.attrs[j].attr_len);
-            if (condition_judge)
+			for (unsigned int k = 0; k<index_name.size(); k++)
+			{
+				if (table.attrs[j].attr_name == index_name[k])
+					value.push_back(attr_value);
+			}
+			if (condition_judge)
             {
-                for (unsigned int k = 0; k<index_name.size(); k++)
-                {
-                    if (table.attrs[j].attr_name == index_name[k])
-                        value.push_back(attr_value);
-                }
                 for (unsigned int k = 0; k<cList.size(); k++)
                     if (cList[k].attr_name == table.attrs[j].attr_name && !judge_condition(cList[k].op_type, cList[k].cmp_value, attr_value, table.attrs[j].attr_type))
                     {

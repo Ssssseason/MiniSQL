@@ -105,7 +105,7 @@ bool CatalogManager::droptable(Table& table)
 	}
 	else
 	{
-		out.open(database_name + "\\" + database_name + "_tablelist_new.txt", ios::binary);
+		out.open(database_name + "\\" + database_name + "_tablelist_new.txt", ios::out);
 		in.open(database_name + "\\" + database_name + "_tablelist.txt", ios::in);
 		while (!in.eof())
 		{
@@ -121,10 +121,10 @@ bool CatalogManager::droptable(Table& table)
 		out.open(database_name + "\\" + database_name + "_numtable.txt", ios::out);
 		out << num_table << "\t";
 		out.close();
-		remove((database_name + "\\" + database_name + "_tablelist.txt").c_str());
-		rename((database_name + "\\" + database_name + "_tablelist_new.txt").c_str(), (database_name + "\\" + database_name + "_tablelist.txt").c_str());
 		remove((database_name + "\\" + table_name + ".blo").c_str());
 		remove((database_name+"\\"+table_name+"_table_info.cat").c_str());//删除所有索引信息文件
+		remove((database_name + "\\" + database_name + "_tablelist.txt").c_str());
+		rename((database_name + "\\" + database_name + "_tablelist_new.txt").c_str(), (database_name + "\\" + database_name + "_tablelist.txt").c_str());
 		//remove((database_name + "\\" + table_name + "_index_info.idx").c_str());
 		return true;
 	}
@@ -298,16 +298,17 @@ bool CatalogManager::dropindex(Index &index)
 	}
 	in.open(database_name + "\\" + database_name + "_indexlist.txt", ios::in);
 	if (!in.is_open()) { cout << "file _index_info open error" << endl; return false; }
-	out.open(database_name + "\\" + database_name + "_indexlist_new.txt", ios::binary);
-	while (!in.eof())
+	out.open(database_name + "\\" + database_name + "_indexlist_new.txt", ios::out);
+	while (in >> name_index)
 	{
-		in >> name_index >> name_attr >> name_table;
-		if (name_index != index.index_name) out << name_index << "\t" << name_table << "\t" << name_attr << endl;
+		in >> name_table >> name_attr;
+		if (!(name_attr == index.attr_name&&name_table == index.table_name))
+			out << name_index << "\t" << name_table << "\t" << name_attr << endl;
 	}
 	out.close();
 	in.close();
+	remove((database_name + "\\" + index.table_name + "_" + index.attr_name + ".idx").c_str());
 	remove((database_name + "\\" + database_name + "_indexlist.txt").c_str());
 	rename((database_name + "\\" + database_name + "_indexlist_new.txt").c_str(), (database_name + "\\" + database_name + "_indexlist.txt").c_str());
-	remove((database_name + "\\" + index.table_name + "_" + index.attr_name + ".idx").c_str());
 	return true;
 }

@@ -58,8 +58,6 @@ void API::dropTable(string &tableName) {
 				myIndex.dropIndex(DBName, tableName, table.attrs[i].attr_name);
 			}
 		}
-		// 清除record中所有记录
-		myRecord.delete_nocondition(table);
 		// 传入数据库名，表名，操作catalog
 		// 直接调用drop 自动删除catalog中存在的index
 		if (myCatalog.droptable(table)) {
@@ -95,7 +93,7 @@ void API::createIndex(Index &index) {
 void API::dropIndex(string &indexName) {
 	Index index = myCatalog.Read_Index_Info(DBName, indexName);
 	// 同create index
-
+	index.database_name = DBName;
 	if (!index.index_name.empty()) {
 		Table table = myCatalog.Read_Table_Info(DBName, index.table_name);
 		int attrID = table.searchAttrId(index.attr_name);
@@ -388,25 +386,6 @@ void API::createDatabase(string &dataBaseName){
 	myCatalog.createdatabase(dataBaseName);
 }
 
-// Split string by pattern.
-vector<string> API::split(const string &tuple, const string &pattern) {
-	vector<string> oneTuple;
-	string attrValue;
-	size_t currPos = 0, nextPos;
-	while ((nextPos = tuple.find(pattern, currPos)) != string::npos) {
-		// Find next position of pattern and split substring.
-		attrValue = tuple.substr(currPos, nextPos - currPos);
-		oneTuple.push_back(attrValue);
-		currPos = nextPos + pattern.size();
-	}
-	return oneTuple;
-}
-
-// Split string by pattern and get 'id'th string.
-string API::split(const string &tuple, const string &pattern, const int &id) {
-	vector<string> oneTuple = split(tuple, pattern);
-	return oneTuple[id];
-}
 
 // Rearrange CHAR type to fit attribute length.
 void API::rearngValues(Tuple &tuple) {

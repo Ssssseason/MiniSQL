@@ -33,8 +33,8 @@ public:
 	void createDatabase(string &dataBaseName);
 
 private:
-	vector<string> split(const string &tuple, const string &pattern);
-	string split(const string &tuple, const string &pattern, const int &id);
+	//vector<string> split(const string &tuple, const string &pattern);
+	//string split(const string &tuple, const string &pattern, const int &id);
 	void rearngValues(Tuple &tuple);
 	void rearngValues(Table &table, condList &cList);
 	void insertTuple(Tuple &tuple);
