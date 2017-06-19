@@ -3,10 +3,9 @@
 //#include "interpreter.hpp"
 #include "stdafx.h"
 #include "MiniSQL.h"
-#include "stdlib.h"
 #include <string>
-#include <vector>
 #include <fstream>
+#include <direct.h>
 
 class CatalogManager {
 public:
