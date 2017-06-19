@@ -1350,7 +1350,33 @@ string file_line(string s) {
 	}
 	//获取帮助
 	else if (temp == "help") {
-		cout << "You can use those command:" << endl << "Create" << endl << "Use" << endl << "Select" << endl << "Drop" << endl << "Execfile" << endl << "Delete" << endl << "Quit" << endl;
+		cout << endl;
+		cout << endl;
+		cout << "欢迎使用本系统！" << endl;
+		cout << "本系统当前支持如下功能：" << endl;
+		cout << "-对数据库的操作:" << endl;
+		cout << "    -创建数据库    示例语句：create database db;" << endl;
+		cout << "    -切换数据库    示例语句：use database db;" << endl;
+		cout << "    -删除数据库    示例语句：drop database db;" << endl;
+		cout << "-对表的操作:" << endl;
+		cout << "    -创建表        示例语句：create table student (id int , primary key(id));" << endl;
+		cout << "    -删除表        示例语句：drop table student;" << endl;
+		cout << "-对记录的操作:" << endl;
+		cout << "    -插入记录      示例语句：insert into student values(‘3150000000‘);" << endl;
+		cout << "    -删除记录      示例语句：delete from student;" << endl;
+		cout << "			     delete from student where id =3150000000;" << endl;
+		cout << "    -选择记录      示例语句：select * from student;" << endl;
+		cout << "			     select id from student where id=3150000000;" << endl;
+		cout << "-对索引的操作:" << endl;
+		cout << "    -创建索引      示例语句：create index ind on student(id);" << endl;
+		cout << "    -删除索引      示例语句：drop index ind;" << endl;
+		cout << "-对脚本的操作:" << endl;
+		cout << "    -执行脚本      示例语句：execfile test;" << endl;
+		cout << "-对系统的操作:" << endl;
+		cout << "    -退出系统      示例语句：quit;" << endl;
+		cout << "    -调出提示      示例语句：help;" << endl;
+		cout << "感谢您的支持，祝您使用愉快！" << endl;
+		cout << endl;
 		s = "";
 	}
 	//若为非法语句
@@ -1720,6 +1746,33 @@ string Interpreter(string statement)
 	//获取帮助
 	else if (temp == "help") {
 		SQL = "80";
+		cout << endl;
+		cout << endl;
+		cout << "欢迎使用本系统！" << endl;
+		cout << "本系统当前支持如下功能：" << endl;
+		cout << "-对数据库的操作:" << endl;
+		cout << "    -创建数据库    示例语句：create database db;" << endl;
+		cout << "    -切换数据库    示例语句：use database db;" << endl;
+		cout << "    -删除数据库    示例语句：drop database db;" << endl;
+		cout << "-对表的操作:" << endl;
+		cout << "    -创建表        示例语句：create table student (id int , primary key(id));" << endl;
+		cout << "    -删除表        示例语句：drop table student;" << endl;
+		cout << "-对记录的操作:" << endl;
+		cout << "    -插入记录      示例语句：insert into student values(‘3150000000‘);" << endl;
+		cout << "    -删除记录      示例语句：delete from student;" << endl;
+		cout << "			     delete from student where id =3150000000;" << endl;
+		cout << "    -选择记录      示例语句：select * from student;" << endl;
+		cout << "			     select id from student where id=3150000000;" << endl;
+		cout << "-对索引的操作:" << endl;
+		cout << "    -创建索引      示例语句：create index ind on student(id);" << endl;
+		cout << "    -删除索引      示例语句：drop index ind;" << endl;
+		cout << "-对脚本的操作:" << endl;
+		cout << "    -执行脚本      示例语句：execfile test;" << endl;
+		cout << "-对系统的操作:" << endl;
+		cout << "    -退出系统      示例语句：quit;" << endl;
+		cout << "    -调出提示      示例语句：help;" << endl;
+		cout << "感谢您的支持，祝您使用愉快！" << endl;
+		cout << endl;
 	}
 	//若为非法语句
 	else
