@@ -121,9 +121,8 @@ bool CatalogManager::droptable(Table& table)
 		out.open(database_name + "\\" + database_name + "_numtable.txt", ios::out);
 		out << num_table << "\t";
 		out.close();
-		string a = database_name + "\\" + table_name + ".blo";
-		int b = remove((database_name + "\\" + table_name + ".blo").c_str());
-		int c = remove((database_name+"\\"+table_name+"_table_info.cat").c_str());//删除所有索引信息文件
+		remove((database_name + "\\" + table_name + ".blo").c_str());
+		remove((database_name+"\\"+table_name+"_table_info.cat").c_str());//删除所有索引信息文件
 		remove((database_name + "\\" + database_name + "_tablelist.txt").c_str());
 		rename((database_name + "\\" + database_name + "_tablelist_new.txt").c_str(), (database_name + "\\" + database_name + "_tablelist.txt").c_str());
 		//remove((database_name + "\\" + table_name + "_index_info.idx").c_str());
@@ -214,8 +213,15 @@ bool CatalogManager::dropdatabase(string database_name)
 		out.close();
 		remove("Databaselist.txt");
 		rename("Databaselist_new.txt", "Databaselist.txt");
-		string cmd = "rm " + database_name+" -rf";
-		if (system(cmd.c_str()) == -1) cout << "file delete error" << endl;
+		vector <string> v_cmd;
+		string cmd_idx = "del " + database_name + "\\" + database_name + "_indexlist.txt";
+		string cmd_ntbl = "del " + database_name + "\\" + database_name + "_numtable.txt";
+		string cmd_tblst = "del " + database_name + "\\" + database_name + "_tablelist.txt";
+		string cmd_rd = "rd " + database_name;
+		system(cmd_idx.c_str());
+		system(cmd_ntbl.c_str());
+		system(cmd_tblst.c_str());
+		system(cmd_rd.c_str());
 	}
 	return true;
 }
